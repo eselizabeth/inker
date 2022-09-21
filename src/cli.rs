@@ -23,17 +23,23 @@ impl Cli{
                 argument = args[2].clone();
             }
         }
-        else{
+        else if command == "deleteall".to_string()
+        || command == "build".to_string()
+        || command == "clean".to_string() {
             argument = "".to_string();
+        }
+        else{
+            return Err("you entered an unknown command");
         }
         Ok(Cli{command, argument})
     }
     pub fn handle_input(&self){
+        FileHandler::initalize();
         if self.command == "build"{
-            generate("output.html".to_string());
+            generate("bit-shifting.md".to_string());
         }
         else if self.command == "clean"{
-            FileHandler::delete_folder(BUILD_FOLDER);
+            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
         }
         else if self.command == "new"{
             FileHandler::create_post(self.argument.clone());
@@ -41,9 +47,13 @@ impl Cli{
         else if self.command == "delete"{
             FileHandler::delete_post(self.argument.clone());
         }
-        else if self.command == "deletall"{
-            FileHandler::delete_folder(BUILD_FOLDER);
-            FileHandler::clean_posts();
+        else if self.command == "deleteall"{
+            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+            FileHandler::remove_folder_content("posts".to_string());
+            println!("sucessfully deleted all content");
+        }
+        else{
+            println!("command not found: {}", self.command);
         }
     }
 }

@@ -6,6 +6,8 @@ use std::io::{Write};
 use std::path::Path;
 use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
+use crate::file_handler::{FileHandler};
+
 
 extern crate tera;
 
@@ -67,7 +69,7 @@ pub fn write_to_a_file(path: &str, output: String){
     }
     fs::create_dir(BUILD_FOLDER).expect("Couldn't create the folder");
     // **
-    move_css();
+    FileHandler::move_css();
     let output_file = format!("{}/{}", BUILD_FOLDER, path);
     let mut file = File::create(output_file).expect("Couldn't create the output fikle");
     write!(file, "{output}").expect("Couldn't write to the output file");
@@ -97,20 +99,7 @@ fn md_to_html(contents: String) -> String{
 }
 
 
-/// Iterates over the $TEMPLATES folder ands moves each .css file to $BUILD folder
-pub fn move_css(){
-    let mut css_files: Vec<String> = Vec::new();
-    let files = fs::read_dir(TEMPLATE_FOLDER).unwrap();
-    files
-        .filter_map(Result::ok)
-        .filter(|d| if let Some(e) = d.path().extension() { e == "css" } else {false})
-        .for_each(|f| css_files.push(f.file_name().into_string().expect("Error on moving css")));
-    for css_file in css_files{
-        let from = format!("{}/{}", TEMPLATE_FOLDER, css_file);
-        let to = format!("{}/{}", BUILD_FOLDER, css_file);
-        fs::copy(from, to).expect("Couldn't move the css file");
-    }
-}
+
 
 /// Returns table of content made up from [h2..h6] of given string containing HTML
 pub fn get_table_of_content(html: String) -> String{
