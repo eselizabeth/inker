@@ -1,12 +1,16 @@
 pub mod generate;
+pub mod cli;
+pub mod file_handler;
+use crate::cli::{Cli};
+use std::{env, process};
 
-use crate::generate::{generate};
-
-use std::{env};
 
 fn main() {
-    // Currently this program only takes a file name and creates of html for with according to the given template
     let args: Vec<String> = env::args().collect();
-    let file = &args[1];
-    generate(file.clone());
+    let cli = Cli::new(&args).unwrap_or_else(|err| {
+        println!("A problem occured while parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    cli.handle_input();
 }

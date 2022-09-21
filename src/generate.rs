@@ -9,8 +9,8 @@ use yaml_rust::{Yaml, YamlLoader};
 
 extern crate tera;
 
-const BUILD_FOLDER: &str = "build";
-const TEMPLATE_FOLDER: &str = "templates";
+pub const BUILD_FOLDER: &str = "build";
+pub const TEMPLATE_FOLDER: &str = "templates";
 
 #[derive(Serialize)]
 pub struct Post{
