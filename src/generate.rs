@@ -7,7 +7,6 @@ use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
 
-
 extern crate tera;
 
 const POSTS_FOLDER: &str = "posts";
@@ -23,6 +22,11 @@ pub struct Post{
     tags: Vec<String>,
 }
 
+#[derive(Serialize)]
+pub struct IndexPost{
+    title: String,
+    summary: String,
+}
 
 
 impl Post{
@@ -48,29 +52,38 @@ impl Post{
 }
 
 pub struct Generator{
-
+    tera: tera::Tera,
 }
 
 impl Generator{
-    pub fn generate(){
+    /// Returns a Tera instance
+    pub fn new() -> Generator{
         let mut tera = match Tera::new("templates/*") {
             Ok(file) => file,
             Err(error) => panic!("Problem with glob: {:?}", error),
         };
         tera.autoescape_on(vec![]);
+        Generator{tera}
+    }
+
+    /// Generates post to the $BUILD folder
+    pub fn generate(self){
         let posts: Vec<String> = FileHandler::get_posts();
+        let mut post_indexes: Vec<IndexPost> = Vec::new();
         for post in &posts{
             let output_path = format!("{}/{}.html", BUILD_FOLDER, post); 
             let example_post = Post::new(post.as_str());
             let mut context = tera::Context::new();
             context.insert("post", &example_post);
-            let output = tera.render("template.html", &context).expect("Couldn't render context to template");
+            let output = self.tera.render("post_template.html", &context).expect("Couldn't render context to template");
             Generator::write_to_a_file(&output_path, output);
+            post_indexes.push(IndexPost{title: post.to_string(), summary: "test".to_string()});
         }
         println!("successfully generated {} post(s)", posts.len());
+        self.get_index(post_indexes);
     }
 
-    pub fn write_to_a_file(path: &str, output: String){
+    fn write_to_a_file(path: &str, output: String){
         FileHandler::move_css();
         let mut file = File::create(path).expect("Couldn't create the output fille");
         write!(file, "{output}").expect("Couldn't write to the output file");
@@ -79,7 +92,7 @@ impl Generator{
     
     
     /// Takes a file to path and returns as YAML metadata section and the rest(post content)
-    pub fn parse_frontmatter(input: &str) -> (String, String){
+    fn parse_frontmatter(input: &str) -> (String, String){
         let start_index = input.find("---").unwrap();
         let end_index = input[start_index + 3..].find("---").unwrap();
         return  (String::from(&input[start_index + 3..end_index + 2]),
@@ -99,9 +112,18 @@ impl Generator{
         return html_output;
     }
     /// Returns table of content made up from [h2..h6] of given string containing HTML
-    pub fn get_table_of_content(html: String) -> String{
+    fn get_table_of_content(html: String) -> String{
         return String::from("");
+    
 }
+    // gets the post names and generates main page for them
+    fn get_index(self, posts: Vec<IndexPost>){
+        let mut context = tera::Context::new();
+        context.insert("posts", &posts);
+        let output = self.tera.render("index_template.html", &context).expect("Couldn't render context to template");
+        let output_path = format!("{}/{}.html", BUILD_FOLDER, "main"); 
+        Generator::write_to_a_file(&output_path, output);
+    }
 }
 
 

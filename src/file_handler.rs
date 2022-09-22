@@ -31,7 +31,6 @@ impl FileHandler{
 
     /// For /posts folder creates a folder and .md file inside it with the slug version of given name
     pub fn create_post(post_name: String){
-        //let sub = "Writing a static website generation in Rust";
         let post_slug = slugify!(&post_name.clone());
         let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
         let file_name = format!("{}/{}", folder_name, (post_slug.clone() + ".md"));
@@ -42,6 +41,7 @@ impl FileHandler{
         else{
             let mut file = File::create(file_name).expect("Couldn't create the output file");
             write!(file, "{POST_TEMPLATE}").expect("Couldn't write to the output file");
+            println!("successfully created post: {}", post_name);
         }
 
     }
@@ -51,7 +51,10 @@ impl FileHandler{
         let post_slug = slugify!(&post_name.clone());
         let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
         let result: bool = FileHandler::delete_folder(&folder_name);
-        if result == false{
+        if result == true{
+            println!("successfully deleted post: {}", post_name);
+        }
+        else if result == false{
             println!("this post doesn't exist: {}", post_name);
         }
     }

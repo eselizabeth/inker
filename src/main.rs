@@ -8,7 +8,7 @@ use std::{env, process};
 fn main() {
     let args: Vec<String> = env::args().collect();
     let cli = Cli::new(&args).unwrap_or_else(|err| {
-        println!("A problem occured while parsing arguments: {err}");
+        println!("inker failed: {err}");
         process::exit(1);
     });
 

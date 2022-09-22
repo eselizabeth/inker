@@ -7,17 +7,21 @@
     <link href="bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
-        <div class="metadata mt-5 text-end fw-light fs-5">
-            <p>Posted by {{post.author}} <br> @ {{ post.date }}</p>
+    <div class="container" style="padding-left: 12%;padding-right: 12%;">
+      <article>
+        <div class="mt-5 text-end fw-light fs-5">
+          <p>Posted by {{post.author}} <br> @ {{ post.date }}</p>
         </div>
-        <div class="content mt-5">
-            <h1>{{post.title}}</h1>
-            <hr>
-            <p class="fs-5">    
-              {{post.content}}
-            </p>
-        </div>
+      <content>
+        <div class="mt-5">
+          <h1>{{post.title}}</h1>
+          <hr>
+          <p class="fs-5">    
+            {{post.content}}
+          </p>
+      </content>
+    </div>
+      </article>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
   </body>

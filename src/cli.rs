@@ -1,61 +1,57 @@
 use crate::generate::{Generator, BUILD_FOLDER, TEMPLATE_FOLDER};
 use crate::file_handler::{FileHandler};
 
-pub struct Cli{
+
+
+const CURRENT_COMMANDS: [&'static str; 5] = ["build", "clean", "new", "delete", "deleteall"];
+
+
+pub struct Cli<'a>{
     command: String,
-    argument: String,
+    all_args: &'a [String],
 }
 
-impl Cli{
+impl Cli<'_>{
     pub fn new(args: &[String]) -> Result<Cli, &'static str>{
         if args.len() < 2 {
-            return Err("not enough arguments");
+            return Err("not enough arg2s");
         }
         let command = args[1].clone();
-        let argument: String; 
         if command == "new".to_string()
         || command == "delete".to_string()
         {
             if args.len() < 3{
                 return Err("not enough arguments, please provide the post name");
             }
-            else{
-                argument = args[2].clone();
-            }
         }
-        else if command == "deleteall".to_string()
-        || command == "build".to_string()
-        || command == "clean".to_string() {
-            argument = "".to_string();
-        }
-        else{
-            return Err("you entered an unknown command");
+        if !CURRENT_COMMANDS.contains(&command.as_str()){
+            return Err("you entered an unknown command. current commands are \nbuild\nclean\nnew\ndelete\ndeleteall");
         }
         let all_args = args.clone();
-        Ok(Cli{command, argument})
+        Ok(Cli{command, all_args})
     }
     pub fn handle_input(&self){
         FileHandler::initalize();
         if self.command == "build"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
-            Generator::generate();
+            let generator = Generator::new();
+            generator.generate();
         }
         else if self.command == "clean"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
         }
         else if self.command == "new"{
-            FileHandler::create_post(self.argument.clone());
+            let full_name = &self.all_args[2..self.all_args.len()].join(" ");
+            FileHandler::create_post(full_name.to_string());
         }
         else if self.command == "delete"{
-            FileHandler::delete_post(self.argument.clone());
+            let full_name = &self.all_args[2..self.all_args.len()].join(" ");
+            FileHandler::delete_post(full_name.to_string());
         }
         else if self.command == "deleteall"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
             FileHandler::remove_folder_content("posts".to_string());
             println!("sucessfully deleted all content");
-        }
-        else{
-            println!("command not found: {}", self.command);
         }
     }
 }
