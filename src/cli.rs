@@ -1,4 +1,4 @@
-use crate::generate::{generate, BUILD_FOLDER, TEMPLATE_FOLDER};
+use crate::generate::{Generator, BUILD_FOLDER, TEMPLATE_FOLDER};
 use crate::file_handler::{FileHandler};
 
 pub struct Cli{
@@ -31,12 +31,14 @@ impl Cli{
         else{
             return Err("you entered an unknown command");
         }
+        let all_args = args.clone();
         Ok(Cli{command, argument})
     }
     pub fn handle_input(&self){
         FileHandler::initalize();
         if self.command == "build"{
-            generate("bit-shifting.md".to_string());
+            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+            Generator::generate();
         }
         else if self.command == "clean"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
