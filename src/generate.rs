@@ -70,8 +70,14 @@ impl Generator{
     pub fn generate(self){
         let posts: Vec<String> = FileHandler::get_posts();
         let mut post_indexes: Vec<IndexPost> = Vec::new();
+        FileHandler::create_folder(&format!("{}/{}", BUILD_FOLDER, POSTS_FOLDER));
         for post in &posts{
-            let output_path = format!("{}/{}.html", BUILD_FOLDER, post); 
+            FileHandler::create_folder(&format!("{}/{}/{}/", BUILD_FOLDER, POSTS_FOLDER, post));
+            let output_path = format!("{}/{}/{}/{}.html", BUILD_FOLDER, POSTS_FOLDER, post, post);
+            FileHandler::move_content(format!("{}/{}", POSTS_FOLDER, post),
+                                      format!("{}/{}/{}", BUILD_FOLDER, POSTS_FOLDER, post),
+                                      "md",
+            );
             let example_post = Post::new(post.as_str());
             let mut context = tera::Context::new();
             context.insert("post", &example_post);
@@ -84,7 +90,8 @@ impl Generator{
     }
 
     fn write_to_a_file(path: &str, output: String){
-        FileHandler::move_css();
+        // moves css files in templates to $BUILD folder
+        FileHandler::move_content(TEMPLATE_FOLDER.to_string(), BUILD_FOLDER.to_string(), "html");
         let mut file = File::create(path).expect("Couldn't create the output fille");
         write!(file, "{output}").expect("Couldn't write to the output file");
     

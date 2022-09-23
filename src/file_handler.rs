@@ -110,18 +110,18 @@ impl FileHandler{
         }
     }
 
-    /// Iterates over the $TEMPLATES folder ands moves each .css file to $BUILD folder
-    pub fn move_css(){
-        let mut css_files: Vec<String> = Vec::new();
-        let files = fs::read_dir(TEMPLATE_FOLDER).unwrap();
+    /// Iterates over the from_folder folder ands moves each file that doesn't uymak to filter to to_folder folder
+    pub fn move_content(from_folder: String, to_folder: String, filter: &str){
+        let mut other_files: Vec<String> = Vec::new();
+        let files = fs::read_dir(from_folder.clone()).unwrap();
         files
             .filter_map(Result::ok)
-            .filter(|d| if let Some(e) = d.path().extension() { e == "css" } else {false})
-            .for_each(|f| css_files.push(f.file_name().into_string().expect("Error on moving css")));
-        for css_file in css_files{
-            let from = format!("{}/{}", TEMPLATE_FOLDER, css_file);
-            let to = format!("{}/{}", BUILD_FOLDER, css_file);
-            fs::copy(from, to).expect("Couldn't move the css file");
+            .filter(|d| if let Some(e) = d.path().extension() { e != filter } else {false})
+            .for_each(|f| other_files.push(f.file_name().into_string().expect("Error on moving file")));
+        for file in other_files{
+            let from = format!("{}/{}", from_folder, file);
+            let to = format!("{}/{}", to_folder, file);
+            fs::copy(from, to).expect("Couldn't move the content file");
         }
     }
 }
