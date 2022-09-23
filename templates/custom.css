@@ -1,0 +1,5 @@
+/* img-fluid class in bootstrap */
+img {
+    max-width:100%;
+    height:auto
+} 

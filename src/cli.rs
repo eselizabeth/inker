@@ -49,9 +49,21 @@ impl Cli<'_>{
             FileHandler::delete_post(full_name.to_string());
         }
         else if self.command == "deleteall"{
-            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
-            FileHandler::remove_folder_content("posts".to_string());
-            println!("sucessfully deleted all content");
+            let mut user_input = String::new();
+            println!("are you sure you want to delete all the posts? [y/n]");
+            std::io::stdin().read_line(&mut user_input).unwrap();
+            user_input.pop().unwrap(); // to remove the \n
+            if user_input == "y" || user_input == "yes"{
+                FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+                FileHandler::remove_folder_content("posts".to_string());
+                println!("sucessfully deleted all content");
+            }
+            else if user_input == "n" || user_input == "no"{
+                println!("deletion aborted");
+            }
+            else{
+                println!("please enter yes or no");
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ impl FileHandler{
         let _ = FileHandler::create_folder(TEMPLATE_FOLDER);
     }
 
-    /// For /posts folder creates a folder and .md file inside it with the slug version of given name
+    /// For $posts folder creates a folder and .md file inside it with the slug version of given name
     pub fn create_post(post_name: String){
         let post_slug = slugify!(&post_name.clone());
         let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
@@ -46,7 +46,7 @@ impl FileHandler{
 
     }
 
-    /// For /posts folder deletes folder with the given name
+    /// For $posts folder deletes folder with the given name
     pub fn delete_post(post_name: String){
         let post_slug = slugify!(&post_name.clone());
         let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
@@ -110,7 +110,7 @@ impl FileHandler{
         }
     }
 
-    /// Iterates over the from_folder folder ands moves each file that doesn't uymak to filter to to_folder folder
+    /// Iterates over the from_folder folder ands moves each file that doesn't fit to filter to to_folder folder
     pub fn move_content(from_folder: String, to_folder: String, filter: &str){
         let mut other_files: Vec<String> = Vec::new();
         let files = fs::read_dir(from_folder.clone()).unwrap();
