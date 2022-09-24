@@ -72,7 +72,7 @@ impl Generator{
     }
 
     /// Generates post to the $BUILD folder
-    pub fn generate(self){
+    pub fn generate(self, call_from_livereload_: bool){
         let posts: Vec<String> = FileHandler::get_posts();
         let mut post_indexes: Vec<IndexPost> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", BUILD_FOLDER, POSTS_FOLDER));
@@ -90,7 +90,9 @@ impl Generator{
             Generator::write_to_a_file(&output_path, output);
             post_indexes.push(IndexPost{title: new_post.title, title_slug: post.to_string(), summary: new_post.summary, date: new_post.date, tags: new_post.tags});
         }
-        println!("successfully generated {} post(s)", posts.len());
+        if call_from_livereload_ == false{
+            println!("successfully generated {} post(s)", posts.len());
+        }
         self.get_index(post_indexes);
     }
 

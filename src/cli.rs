@@ -1,9 +1,17 @@
 use crate::generate::{Generator, BUILD_FOLDER, TEMPLATE_FOLDER};
 use crate::file_handler::{FileHandler};
+use std::io::prelude::*;
+use std::net::{TcpListener, TcpStream};
+
+extern crate notify;
+
+use notify::{Watcher, RecursiveMode, Config, RecommendedWatcher, EventKind};
+use std::sync::mpsc::channel;
+use std::time::Duration;
+use std::path::Path;
 
 
-
-const CURRENT_COMMANDS: [&'static str; 5] = ["build", "clean", "new", "delete", "deleteall"];
+const CURRENT_COMMANDS: [&'static str; 6] = ["build", "clean", "new", "delete", "deleteall", "livereload"];
 
 
 pub struct Cli<'a>{
@@ -35,7 +43,7 @@ impl Cli<'_>{
         if self.command == "build"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
             let generator = Generator::new();
-            generator.generate();
+            generator.generate(false);
         }
         else if self.command == "clean"{
             FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
@@ -63,6 +71,29 @@ impl Cli<'_>{
             }
             else{
                 println!("please enter yes or no");
+            }
+        }
+        else if self.command == "livereload"{
+            println!("watching for changes..");
+            let (sender, receiver) = channel();
+            let mut watcher: RecommendedWatcher = Watcher::new(sender, Config::default()
+            .with_poll_interval(Duration::from_secs(5))
+            .with_compare_contents(true)).unwrap();
+            watcher.watch(Path::new(TEMPLATE_FOLDER), RecursiveMode::Recursive).unwrap();
+            watcher.watch(Path::new("posts"), RecursiveMode::Recursive).unwrap();
+
+            loop {
+                match receiver.recv() {
+                Ok(event) => match event.unwrap().kind {
+                    EventKind::Access(_) => {
+                        println!("changes found, reloading");
+                        let generator = Generator::new();
+                        generator.generate(true);
+                    }
+                    _ => (),
+                },
+                Err(e) => println!("watch error {:?}", e),
+                }
             }
         }
     }
