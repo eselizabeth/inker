@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %} {{post.title}} {% endblock title %}
+{% block head %}
+<link href="../../bootstrap.min.css" rel="stylesheet">
+<link href="../../custom.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+<article>
+  <div class="mt-5 text-end fw-light">
+    <p>Posted by {{post.author}} <br> <i class="fa-regular fa-calendar"></i> {{ post.date }}</p>
+  </div>
+  <content>
+    <div class="mt-5">
+      <h1>{{post.title}}</h1>
+      <div class="text-end">
+        <a href="../../index.html"><i class="fa-solid fa-house"></i> Go back to main page</a>
+      </div>
+      <hr>
+      <p class="fs-5">    
+        {{post.content}}
+      </p>
+  </content>
+</article>
+{% endblock content %}

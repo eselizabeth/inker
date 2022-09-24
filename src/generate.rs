@@ -17,6 +17,7 @@ pub const TEMPLATE_FOLDER: &str = "templates";
 pub struct Post{
     title: String,
     date: String,
+    summary: String,
     content: String,
     author: String,
     tags: Vec<String>,
@@ -25,7 +26,10 @@ pub struct Post{
 #[derive(Serialize)]
 pub struct IndexPost{
     title: String,
+    title_slug: String,
     summary: String,
+    date: String,
+    tags: Vec<String>,
 }
 
 
@@ -44,6 +48,7 @@ impl Post{
         return Post{
             title: docs[0]["title"].as_str().unwrap().to_string(),
             date: docs[0]["date"].as_str().unwrap().to_string(),
+            summary: docs[0]["summary"].as_str().unwrap().to_string(),
             content: Generator::md_to_html(post_content),
             author: docs[0]["author"].as_str().unwrap().to_string(),
             tags: tags,
@@ -78,12 +83,12 @@ impl Generator{
                                       format!("{}/{}/{}", BUILD_FOLDER, POSTS_FOLDER, post),
                                       "md",
             );
-            let example_post = Post::new(post.as_str());
+            let new_post = Post::new(post.as_str());
             let mut context = tera::Context::new();
-            context.insert("post", &example_post);
-            let output = self.tera.render("post_template.html", &context).expect("Couldn't render context to template");
+            context.insert("post", &new_post);
+            let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             Generator::write_to_a_file(&output_path, output);
-            post_indexes.push(IndexPost{title: post.to_string(), summary: "test".to_string()});
+            post_indexes.push(IndexPost{title: new_post.title, title_slug: post.to_string(), summary: new_post.summary, date: new_post.date, tags: new_post.tags});
         }
         println!("successfully generated {} post(s)", posts.len());
         self.get_index(post_indexes);
@@ -127,8 +132,8 @@ impl Generator{
     fn get_index(self, posts: Vec<IndexPost>){
         let mut context = tera::Context::new();
         context.insert("posts", &posts);
-        let output = self.tera.render("index_template.html", &context).expect("Couldn't render context to template");
-        let output_path = format!("{}/{}.html", BUILD_FOLDER, "main"); 
+        let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
+        let output_path = format!("{}/{}.html", BUILD_FOLDER, "index"); 
         Generator::write_to_a_file(&output_path, output);
     }
 }

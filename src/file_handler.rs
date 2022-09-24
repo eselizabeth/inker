@@ -11,7 +11,8 @@ const TEMPLATE_FOLDER: &str = "templates";
 
 const POST_TEMPLATE: &str = r#"---
 title: "title"
-date: 1 Jan 1970
+date: "1 Jan 1970"
+summary: "summary"
 author: "author"
 tags: [tag1, tag2]
 ---

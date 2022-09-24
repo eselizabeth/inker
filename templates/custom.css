@@ -1,0 +1,33 @@
+/* img-fluid class */
+img{
+    max-width:100%;
+    height:auto
+}
+
+/* unvisited link */
+a:link{
+    color: green;
+    text-decoration: none;
+}
+
+
+/* visited link */
+a:visited {
+    color: green;
+    text-decoration: none;
+}
+
+/* mouse over link */
+a:hover {
+    color: green;
+    text-decoration: none;}
+
+/* selected link */
+a:active {
+    color: green;
+    text-decoration: none;
+}
+
+hr{
+    color: black;
+}
