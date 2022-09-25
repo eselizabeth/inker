@@ -20,7 +20,8 @@ a:visited {
 /* mouse over link */
 a:hover {
     color: green;
-    text-decoration: none;}
+    text-decoration: none;
+}
 
 /* selected link */
 a:active {

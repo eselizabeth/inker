@@ -12,8 +12,9 @@ extern crate tera;
 const POSTS_FOLDER: &str = "posts";
 pub const BUILD_FOLDER: &str = "build";
 pub const TEMPLATE_FOLDER: &str = "templates";
+const POST_PER_PAGE: usize = 2;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct Post{
     title: String,
     date: String,
@@ -23,7 +24,7 @@ pub struct Post{
     tags: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct IndexPost{
     title: String,
     title_slug: String,
@@ -93,7 +94,7 @@ impl Generator{
         if call_from_livereload_ == false{
             println!("successfully generated {} post(s)", posts.len());
         }
-        self.get_index(post_indexes);
+        self.get_index(&mut post_indexes);
     }
 
     fn write_to_a_file(path: &str, output: String){
@@ -131,16 +132,48 @@ impl Generator{
     
 }
     // gets the post names and generates main page for them
-    fn get_index(self, posts: Vec<IndexPost>){
-        let mut context = tera::Context::new();
-        context.insert("posts", &posts);
-        let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-        let output_path = format!("{}/{}.html", BUILD_FOLDER, "index"); 
-        Generator::write_to_a_file(&output_path, output);
+    fn get_index(self, posts: &mut Vec<IndexPost>){
+        posts.sort_by_key(|d| d.date.clone());
+        let mut page_counter = 1;
+        let max_page_counter = (posts.len() as f32/ POST_PER_PAGE as f32).ceil() as i32;
+        loop{
+            if posts.len() >= POST_PER_PAGE{
+                let mut page_posts: Vec<IndexPost> = Vec::new();
+                page_posts.push(posts.pop().expect("error"));
+                page_posts.push(posts.pop().expect("error"));
+                let mut context = tera::Context::new();
+                context.insert("posts", &page_posts);
+                context.insert("page_counter", &(page_counter));
+                context.insert("max_page_counter", &max_page_counter);
+                let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
+                let output_path = format!("{}/{}.html", BUILD_FOLDER, get_index_name(page_counter)); 
+                Generator::write_to_a_file(&output_path, output);
+            }
+            else{
+                if posts.len() > 0{
+                    let post = posts.clone();
+                    let mut context = tera::Context::new();
+                    context.insert("posts", &post);
+                    context.insert("page_counter", &(page_counter));
+                    context.insert("max_page_counter", &max_page_counter);
+                    let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
+                    let output_path = format!("{}/{}.html", BUILD_FOLDER, get_index_name(page_counter)); 
+                    Generator::write_to_a_file(&output_path, output);
+                }
+                break;
+            }
+            page_counter += 1;
+
+        }
+
     }
 }
 
 
+// improve it later
+fn get_index_name(num: i32) -> String{
+    return format!("index{}", num);
+}
 
 
 

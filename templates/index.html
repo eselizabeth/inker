@@ -35,5 +35,32 @@
             </div>
         </div>
         {% endfor %}
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            {% if page_counter != 1 %}
+            <li class="page-item">
+              <a class="page-link" href="index{{page_counter - 1}}.html" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            {% endif %}
+            {% if page_counter > 1 %}
+            <li class="page-item"><a class="page-link" href="index{{page_counter - 1}}.html">{{page_counter - 1}}</a></li>
+            {% endif %}
+            {% if page_counter <= max_page_counter %}
+            <li class="page-item"><a class="page-link" href="index{{page_counter}}.html">{{page_counter}}</a></li>
+            {% endif %}
+            {% if page_counter < max_page_counter %}
+            <li class="page-item"><a class="page-link" href="index{{page_counter + 1}}.html">{{page_counter + 1}}</a></li>
+            {% endif %}
+            {% if page_counter < max_page_counter %}
+            <li class="page-item">
+              <a class="page-link" href="index{{page_counter + 1}}.html" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
       </div>
 {% endblock content %}
