@@ -19,7 +19,7 @@
                   <h4>
                     <a href="./posts/{{post.title_slug}}/{{post.title_slug}}.html">{{post.title}}</a>
                   </h4>
-                  <span style="color:#92AECF;">{{post.date}}</span>
+                  <span style="color:#92AECF;">{{post.date | date(format="%d %B %Y")}}</span>
                   <br>
                   <p style="display:inline;">
                     {{post.summary}}
