@@ -5,12 +5,7 @@ use std::path::Path;
 use slugify::slugify;
 use std::time::SystemTime;
 use chrono::{DateTime, Utc};
-
-pub const BUILD_FOLDER: &str = "build";
-const POSTS_FOLDER: &str = "posts";
-const TEMPLATE_FOLDER: &str = "templates";
-
-
+use crate::config::InkerConfig;
 
 
 pub struct FileHandler{
@@ -19,14 +14,14 @@ pub struct FileHandler{
 impl FileHandler{
     /// Creates posts and templates folder if they don't exist
     pub fn initalize(){
-        let _ = FileHandler::create_folder(POSTS_FOLDER);
-        let _ = FileHandler::create_folder(TEMPLATE_FOLDER);
+        let _ = FileHandler::create_folder(InkerConfig::posts_folder());
+        let _ = FileHandler::create_folder(InkerConfig::template_folder());
     }
 
     /// For /posts folder creates a folder and .md file inside it with the slug version of given name
     pub fn create_post(post_name: String){
         let post_slug = slugify!(&post_name.clone());
-        let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
+        let folder_name = format!("{}/{}", InkerConfig::posts_folder(), post_slug);
         let file_name = format!("{}/{}", folder_name, (post_slug.clone() + ".md"));
         let result: bool = FileHandler::create_folder(&folder_name);
         if result == false{
@@ -44,7 +39,7 @@ impl FileHandler{
     /// For /posts folder deletes folder with the given name
     pub fn delete_post(post_name: String){
         let post_slug = slugify!(&post_name.clone());
-        let folder_name = format!("{}/{}", POSTS_FOLDER, post_slug);
+        let folder_name = format!("{}/{}", InkerConfig::posts_folder(), post_slug);
         let result: bool = FileHandler::delete_folder(&folder_name);
         if result == true{
             println!("successfully deleted post: {}", post_name);
@@ -70,7 +65,7 @@ impl FileHandler{
     /// Iterates over the folder and deletes the content
     pub fn get_posts() -> Vec<String>{
         let mut posts: Vec<String> = Vec::new();
-        for folder in fs::read_dir(POSTS_FOLDER).unwrap() {
+        for folder in fs::read_dir(InkerConfig::posts_folder()).unwrap() {
             if folder.as_ref().unwrap().file_type().unwrap().is_dir()  {
                     let post_name = folder.as_ref().unwrap().file_name().into_string().unwrap();
                     posts.push(post_name);

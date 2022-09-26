@@ -1,6 +1,7 @@
 pub mod generate;
 pub mod cli;
 pub mod file_handler;
+pub mod config;
 use crate::cli::{Cli};
 use std::{env, process};
 

@@ -6,13 +6,11 @@ use std::io::{Write};
 use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
+use crate::config::{InkerConfig};
+
 
 extern crate tera;
 
-const POSTS_FOLDER: &str = "posts";
-pub const BUILD_FOLDER: &str = "build";
-pub const TEMPLATE_FOLDER: &str = "templates";
-const POST_PER_PAGE: usize = 2;
 
 #[derive(Serialize, Clone, Debug)]
 pub struct Post{
@@ -36,7 +34,7 @@ pub struct IndexPost{
 
 impl Post{
     pub fn new(post_name: &str) -> Post{
-        let post_path = format!("{}/{}/{}.md", POSTS_FOLDER, post_name, post_name);
+        let post_path = format!("{}/{}/{}.md", InkerConfig::posts_folder(), post_name, post_name);
         let example = fs::read_to_string(post_path)
             .expect("Couldn't read the file");
         let (yaml_data, post_content) = Generator::parse_frontmatter(example.as_str());
@@ -59,6 +57,7 @@ impl Post{
 
 pub struct Generator{
     tera: tera::Tera,
+    config: InkerConfig,
 }
 
 impl Generator{
@@ -69,19 +68,20 @@ impl Generator{
             Err(error) => panic!("Problem with glob: {:?}", error),
         };
         tera.autoescape_on(vec![]);
-        Generator{tera}
+        let config = InkerConfig::new();
+        Generator{tera, config}
     }
 
     /// Generates post to the $BUILD folder
     pub fn generate(self, call_from_livereload_: bool){
         let posts: Vec<String> = FileHandler::get_posts();
         let mut post_indexes: Vec<IndexPost> = Vec::new();
-        FileHandler::create_folder(&format!("{}/{}", BUILD_FOLDER, POSTS_FOLDER));
+        FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
         for post in &posts{
-            FileHandler::create_folder(&format!("{}/{}/{}/", BUILD_FOLDER, POSTS_FOLDER, post));
-            let output_path = format!("{}/{}/{}/{}.html", BUILD_FOLDER, POSTS_FOLDER, post, post);
-            FileHandler::move_content(format!("{}/{}", POSTS_FOLDER, post),
-                                      format!("{}/{}/{}", BUILD_FOLDER, POSTS_FOLDER, post),
+            FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
+            let output_path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post, post);
+            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post),
+                                      format!("{}/{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder(), post),
                                       "md",
             );
             let new_post = Post::new(post.as_str());
@@ -99,7 +99,7 @@ impl Generator{
 
     fn write_to_a_file(path: &str, output: String){
         // moves css files in templates to $BUILD folder
-        FileHandler::move_content(TEMPLATE_FOLDER.to_string(), BUILD_FOLDER.to_string(), "html");
+        FileHandler::move_content(InkerConfig::template_folder().to_string(), InkerConfig::build_folder().to_string(), "html");
         let mut file = File::create(path).expect("Couldn't create the output fille");
         write!(file, "{output}").expect("Couldn't write to the output file");
     
@@ -135,29 +135,29 @@ impl Generator{
     fn get_index(self, posts: &mut Vec<IndexPost>){
         posts.sort_by_key(|d| d.date.clone());
         let mut page_counter = 1;
-        let max_page_counter = (posts.len() as f32/ POST_PER_PAGE as f32).ceil() as i32;
+        let max_page_counter = (posts.len() as f32/ self.config.posts_per_page as f32).ceil() as i32;
         loop{
-            if posts.len() >= POST_PER_PAGE{
-                let mut page_posts: Vec<IndexPost> = Vec::new();
-                page_posts.push(posts.pop().expect("error"));
-                page_posts.push(posts.pop().expect("error"));
+            if posts.len() >= self.config.posts_per_page as usize{
+                let page_posts: Vec<IndexPost> = get_first_n_elements(posts, self.config.posts_per_page);
                 let mut context = tera::Context::new();
+                context.insert("website_name", &self.config.website_name);
                 context.insert("posts", &page_posts);
                 context.insert("page_counter", &(page_counter));
                 context.insert("max_page_counter", &max_page_counter);
                 let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-                let output_path = format!("{}/{}.html", BUILD_FOLDER, get_index_name(page_counter)); 
+                let output_path = format!("{}/{}.html", InkerConfig::build_folder(), get_index_name(page_counter)); 
                 Generator::write_to_a_file(&output_path, output);
             }
             else{
                 if posts.len() > 0{
                     let post = posts.clone();
                     let mut context = tera::Context::new();
+                    context.insert("website_name", &self.config.website_name);
                     context.insert("posts", &post);
                     context.insert("page_counter", &(page_counter));
                     context.insert("max_page_counter", &max_page_counter);
                     let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-                    let output_path = format!("{}/{}.html", BUILD_FOLDER, get_index_name(page_counter)); 
+                    let output_path = format!("{}/{}.html", InkerConfig::build_folder(), get_index_name(page_counter)); 
                     Generator::write_to_a_file(&output_path, output);
                 }
                 break;
@@ -176,7 +176,13 @@ fn get_index_name(num: i32) -> String{
 }
 
 
-
+fn get_first_n_elements(vec: &mut Vec<IndexPost>, n: i32) -> Vec<IndexPost>{
+    let mut n_vector: Vec<IndexPost> = Vec::new();
+    for _ in 0..n{
+        n_vector.push(vec.pop().expect("error"));
+    }
+    return n_vector;
+}
 
 
 

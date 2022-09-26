@@ -8,7 +8,7 @@
 {% block content %}
 <article>
   <div class="mt-5 text-end fw-light">
-    <p>Posted by {{post.author}} <br> <i class="fa-regular fa-calendar"></i>{{post.date | date(format="%d %B %Y")}}</p>
+    <p>Posted by {{post.author}} <br> <i class="fa-regular fa-calendar"></i> {{post.date | date(format="%d %B %Y")}}</p>
   </div>
   <content>
     <div class="mt-5">

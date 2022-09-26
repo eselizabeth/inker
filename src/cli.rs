@@ -1,7 +1,6 @@
-use crate::generate::{Generator, BUILD_FOLDER, TEMPLATE_FOLDER};
+use crate::generate::{Generator};
 use crate::file_handler::{FileHandler};
-use std::io::prelude::*;
-use std::net::{TcpListener, TcpStream};
+use crate::config::{InkerConfig};
 
 extern crate notify;
 
@@ -41,12 +40,12 @@ impl Cli<'_>{
     pub fn handle_input(&self){
         FileHandler::initalize();
         if self.command == "build"{
-            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+            FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
             let generator = Generator::new();
             generator.generate(false);
         }
         else if self.command == "clean"{
-            FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+            FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
         }
         else if self.command == "new"{
             let full_name = &self.all_args[2..self.all_args.len()].join(" ");
@@ -62,7 +61,7 @@ impl Cli<'_>{
             std::io::stdin().read_line(&mut user_input).unwrap();
             user_input.pop().unwrap(); // to remove the \n
             if user_input == "y" || user_input == "yes"{
-                FileHandler::remove_folder_content(BUILD_FOLDER.to_string());
+                FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
                 FileHandler::remove_folder_content("posts".to_string());
                 println!("sucessfully deleted all content");
             }
@@ -79,8 +78,9 @@ impl Cli<'_>{
             let mut watcher: RecommendedWatcher = Watcher::new(sender, Config::default()
             .with_poll_interval(Duration::from_secs(5))
             .with_compare_contents(true)).unwrap();
-            watcher.watch(Path::new(TEMPLATE_FOLDER), RecursiveMode::Recursive).unwrap();
-            watcher.watch(Path::new("posts"), RecursiveMode::Recursive).unwrap();
+            watcher.watch(Path::new(InkerConfig::template_folder()), RecursiveMode::Recursive).unwrap();
+            watcher.watch(Path::new(InkerConfig::posts_folder()), RecursiveMode::Recursive).unwrap();
+            watcher.watch(Path::new("config.yaml"), RecursiveMode::Recursive).unwrap();
 
             loop {
                 match receiver.recv() {

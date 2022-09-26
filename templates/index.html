@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} main page {% endblock title %}
+{% block title %} {{website_name}} {% endblock title %}
 {% block head %}
 <link href="bootstrap.min.css" rel="stylesheet">
 <link href="custom.css" rel="stylesheet">
@@ -8,7 +8,7 @@
 
 {% block content %}
     <div class="mt-5 text-center">
-        <p>TODO: Better CSS</p>
+        <p>{{website_name}}</p>
     </div>
       <div class="mt-5">
         <hr>
@@ -35,7 +35,7 @@
             </div>
         </div>
         {% endfor %}
-        <nav aria-label="Page navigation example">
+        <nav aria-label="Page navigation example" class="fixed-bottom">
           <ul class="pagination">
             {% if page_counter != 1 %}
             <li class="page-item">
