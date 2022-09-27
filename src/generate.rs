@@ -7,6 +7,7 @@ use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
+use std::{process};
 
 
 extern crate tera;
@@ -33,25 +34,36 @@ pub struct IndexPost{
 
 
 impl Post{
-    pub fn new(post_name: &str) -> Post{
+    pub fn new(post_name: &str) -> Result<Post, String>{
         let post_path = format!("{}/{}/{}.md", InkerConfig::posts_folder(), post_name, post_name);
         let example = fs::read_to_string(post_path)
             .expect("Couldn't read the file");
         let (yaml_data, post_content) = Generator::parse_frontmatter(example.as_str());
+        let content = Generator::md_to_html(post_content);
         let docs: Vec<Yaml> = YamlLoader::load_from_str(&yaml_data).unwrap();
         let tags_return = docs[0]["tags"].clone();
+        // tags aren't mandatory so no checking
         let mut tags: Vec<String> = Vec::new();
         for tag in tags_return{
-            tags.push(tag.as_str().unwrap().to_string());
+            tags.push(tag.as_str().expect("couldn't find tags in the post: {post_name}").to_string());
         }
-        return Post{
-            title: docs[0]["title"].as_str().unwrap().to_string(),
-            date: docs[0]["date"].as_str().unwrap().to_string(),
-            summary: docs[0]["summary"].as_str().unwrap().to_string(),
-            content: Generator::md_to_html(post_content),
-            author: docs[0]["author"].as_str().unwrap().to_string(),
-            tags: tags,
+        let title = match docs[0]["title"].as_str().ok_or("couldn't convert option to result") {
+            Ok(title) => title.to_string(),
+            Err(_) => return Err(format!("couldn't find title in the post: {}", post_name)),
         };
+        let date = match docs[0]["date"].as_str().ok_or("couldn't convert option to result") {
+            Ok(title) => title.to_string(),
+            Err(_) => return Err(format!("couldn't find date in the post: {}", post_name)),
+        };
+        let summary = match docs[0]["summary"].as_str().ok_or("couldn't convert option to result") {
+            Ok(title) => title.to_string(),
+            Err(_) => return Err(format!("couldn't find summary in the post: {}", post_name)),
+        };
+        let author = match docs[0]["author"].as_str().ok_or("couldn't convert option to result") {
+            Ok(title) => title.to_string(),
+            Err(_) => return Err(format!("couldn't find author in the post: {}", post_name)),
+        };
+        Ok(Post{title, date, summary, content, author,tags})
     }
 }
 
@@ -84,7 +96,10 @@ impl Generator{
                                       format!("{}/{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder(), post),
                                       "md",
             );
-            let new_post = Post::new(post.as_str());
+            let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
+                println!("inker failed: {err}");
+                process::exit(1);
+            });
             let mut context = tera::Context::new();
             context.insert("post", &new_post);
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");

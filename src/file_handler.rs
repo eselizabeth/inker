@@ -3,8 +3,6 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use slugify::slugify;
-use std::time::SystemTime;
-use chrono::{DateTime, Utc};
 use crate::config::InkerConfig;
 
 
@@ -29,7 +27,7 @@ impl FileHandler{
         }
         else{
             let mut file = File::create(file_name).expect("Couldn't create the output file");
-            let post_template = FileHandler::get_post_template();
+            let post_template = InkerConfig::post_template();
             write!(file, "{post_template}").expect("Couldn't write to the output file");
             println!("successfully created post: {}", post_name);
         }
@@ -114,27 +112,9 @@ impl FileHandler{
         }
     }
 
-    /// returns the default post template
-    fn get_post_template() -> String{
-        let template = format!(r#"---
-title: "title"
-date: "{}"
-summary: "summary"
-author: "author"
-tags: [tag1, tag2]
----
-Enter your content here"#, FileHandler::get_current_time());
-        return template;
+
     
-    }
-    
-    /// returns the current time in ISO 8601
-    fn get_current_time() -> String{
-        let now = SystemTime::now();
-        let now: DateTime<Utc> = now.into();
-        let now_iso = now.to_rfc3339();
-        return now_iso;
-    }
+
     
 }
 
