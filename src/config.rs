@@ -6,10 +6,13 @@ use yaml_rust::{Yaml, YamlLoader};
 pub struct InkerConfig{
     pub website_name: String,
     pub posts_per_page: i32,
+    pub pagination: bool,
 }
 
 const DEFAULT_CONFIG: &str = r#"website-name: "inker website"
-posts-per-page: "4""#;
+posts-per-page: "4"
+pagination: "false"
+"#;
 
 impl InkerConfig{
     pub fn new() -> InkerConfig{
@@ -25,7 +28,8 @@ impl InkerConfig{
         let config: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let website_name = config[0]["website-name"].as_str().unwrap_or("inker website").to_string();
         let posts_per_page: i32 = config[0]["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
-        InkerConfig{website_name, posts_per_page}
+        let pagination: bool = config[0]["pagination"].as_str().unwrap_or("false").to_string().parse().unwrap();
+        InkerConfig{website_name, posts_per_page, pagination}
     }
     pub fn build_folder() -> &'static str{
         return "build";

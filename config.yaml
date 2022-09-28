@@ -1,2 +1,3 @@
 website-name: "@test name"
 posts-per-page: "4"
+pagination: "true"

@@ -35,6 +35,7 @@
             </div>
         </div>
         {% endfor %}
+        {% if pagination_enabled == true %}
         <nav aria-label="Page navigation example" class="fixed-bottom">
           <ul class="pagination">
             {% if page_counter != 1 %}
@@ -62,5 +63,7 @@
             {% endif %}
           </ul>
         </nav>
+        {% endif %}
+
       </div>
 {% endblock content %}

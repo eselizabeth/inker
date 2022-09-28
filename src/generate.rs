@@ -149,38 +149,44 @@ impl Generator{
     // gets the post names and generates main page for them
     fn get_index(self, posts: &mut Vec<IndexPost>){
         posts.sort_by_key(|d| d.date.clone());
-        let mut page_counter = 1;
-        let max_page_counter = (posts.len() as f32/ self.config.posts_per_page as f32).ceil() as i32;
-        loop{
-            if posts.len() >= self.config.posts_per_page as usize{
-                let page_posts: Vec<IndexPost> = get_first_n_elements(posts, self.config.posts_per_page);
+        if self.config.pagination == false{
+            let mut context = tera::Context::new();
+            context.insert("pagination_enabled", &false);
+            context.insert("website_name", &self.config.website_name);
+            context.insert("posts", &posts);
+            let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
+            let output_path = format!("{}/index.html", InkerConfig::build_folder()); 
+            Generator::write_to_a_file(&output_path, output);
+        }
+        else{
+            let mut page_counter = 1;
+            let max_page_counter = (posts.len() as f32/ self.config.posts_per_page as f32).ceil() as i32;
+            let mut posts_left = true;
+            while posts_left{
                 let mut context = tera::Context::new();
+                context.insert("pagination_enabled", &true);
                 context.insert("website_name", &self.config.website_name);
-                context.insert("posts", &page_posts);
                 context.insert("page_counter", &(page_counter));
                 context.insert("max_page_counter", &max_page_counter);
-                let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-                let output_path = format!("{}/{}.html", InkerConfig::build_folder(), get_index_name(page_counter)); 
-                Generator::write_to_a_file(&output_path, output);
-            }
-            else{
-                if posts.len() > 0{
-                    let post = posts.clone();
-                    let mut context = tera::Context::new();
-                    context.insert("website_name", &self.config.website_name);
-                    context.insert("posts", &post);
-                    context.insert("page_counter", &(page_counter));
-                    context.insert("max_page_counter", &max_page_counter);
-                    let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-                    let output_path = format!("{}/{}.html", InkerConfig::build_folder(), get_index_name(page_counter)); 
-                    Generator::write_to_a_file(&output_path, output);
+                if posts.len() >= self.config.posts_per_page as usize{
+                    let page_posts: Vec<IndexPost> = get_first_n_elements(posts, self.config.posts_per_page);
+                    context.insert("posts", &page_posts);
                 }
-                break;
+                else{
+                    if posts.len() > 0{
+                        let other_posts = posts.clone();
+                        context.insert("posts", &other_posts);
+                        posts_left = false;
+                    }
+                }
+                let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
+                let output_path = format!("{}/{}.html", InkerConfig::build_folder(), get_index_name(page_counter));
+                Generator::write_to_a_file(&output_path, output);
+                page_counter += 1;
             }
-            page_counter += 1;
-
+    
         }
-
+        
     }
 }
 
