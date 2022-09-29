@@ -92,10 +92,9 @@ impl Generator{
         for post in &posts{
             FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
             let output_path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post, post);
-            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post),
-                                      format!("{}/{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder(), post),
-                                      "md",
-            );
+            let static_folder = format!("{}//static", InkerConfig::build_folder());
+            FileHandler::create_folder(static_folder.as_str());
+            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post), static_folder,"md");
             let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
                 println!("inker failed: {err}");
                 process::exit(1);

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %} {{post.title}} {% endblock title %}
 {% block head %}
-<link href="../../bootstrap.min.css" rel="stylesheet">
-<link href="../../custom.css" rel="stylesheet">
+<link href="/build/bootstrap.min.css" rel="stylesheet">
+<link href="/build/custom.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
@@ -14,7 +14,7 @@
     <div class="mt-5">
       <h1>{{post.title}}</h1>
       <div class="text-end">
-        <a href="../../index1.html"><i class="fa-solid fa-house"></i> Go back to main page</a>
+        <a href="/"><i class="fa-solid fa-house"></i> Go back to main page</a>
       </div>
       <hr>
       <p class="fs-5">    

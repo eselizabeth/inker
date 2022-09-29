@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %} {{website_name}} {% endblock title %}
 {% block head %}
-<link href="bootstrap.min.css" rel="stylesheet">
-<link href="custom.css" rel="stylesheet">
+<link href="build/bootstrap.min.css" rel="stylesheet">
+<link href="build/custom.css" rel="stylesheet">
 {% endblock head %}
 
 
@@ -17,7 +17,7 @@
             <div class="col-md-6 offset-md-3 mb-5">
                 <div>
                   <h4>
-                    <a href="./posts/{{post.title_slug}}/{{post.title_slug}}.html">{{post.title}}</a>
+                    <a href="./posts/{{post.title_slug}}">{{post.title}}</a>
                   </h4>
                   <span style="color:#92AECF;">{{post.date | date(format="%d %B %Y")}}</span>
                   <br>
@@ -28,7 +28,7 @@
                     {% for tag in post.tags %}
                     <span class="badge rounded-pill text-bg-primary">{{tag}}</span>
                     {% endfor %}
-                    <a href="./posts/{{post.title_slug}}/{{post.title_slug}}.html">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
+                    <a href="./posts/{{post.title_slug}}">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
                   </div>
 
                 </div>
@@ -40,23 +40,23 @@
           <ul class="pagination">
             {% if page_counter != 1 %}
             <li class="page-item">
-              <a class="page-link" href="index{{page_counter - 1}}.html" aria-label="Previous">
+              <a class="page-link" href="?page={{page_counter - 1}}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
             {% endif %}
             {% if page_counter > 1 %}
-            <li class="page-item"><a class="page-link" href="index{{page_counter - 1}}.html">{{page_counter - 1}}</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{page_counter - 1}}">{{page_counter - 1}}</a></li>
             {% endif %}
             {% if page_counter <= max_page_counter %}
-            <li class="page-item"><a class="page-link" href="index{{page_counter}}.html">{{page_counter}}</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{page_counter}}">{{page_counter}}</a></li>
             {% endif %}
             {% if page_counter < max_page_counter %}
-            <li class="page-item"><a class="page-link" href="index{{page_counter + 1}}.html">{{page_counter + 1}}</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{page_counter + 1}}">{{page_counter + 1}}</a></li>
             {% endif %}
             {% if page_counter < max_page_counter %}
             <li class="page-item">
-              <a class="page-link" href="index{{page_counter + 1}}.html" aria-label="Next">
+              <a class="page-link" href="?page={{page_counter + 1}}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>

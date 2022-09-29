@@ -97,7 +97,7 @@ impl FileHandler{
         }
     }
 
-    /// Iterates over the from_folder folder ands moves each file that doesn't uymak to filter to to_folder folder
+    /// Iterates over the from_folder folder ands moves each file that doesn't fit to the filter to to_folder folder
     pub fn move_content(from_folder: String, to_folder: String, filter: &str){
         let mut other_files: Vec<String> = Vec::new();
         let files = fs::read_dir(from_folder.clone()).unwrap();
