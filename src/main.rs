@@ -6,7 +6,6 @@ pub mod webserver;
 use crate::cli::{Cli};
 use std::{env, process};
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use webserver::{run_server};
 
 
 fn main() {
@@ -17,6 +16,5 @@ fn main() {
     });
 
     cli.handle_input();
-    run_server();
 }
 

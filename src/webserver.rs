@@ -7,11 +7,11 @@ use crate::config::InkerConfig;
 #[actix_web::main]
 pub async fn run_server() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
-    println!("webserver started at: 127.0.0.1:8080");
+    println!("web server started at: http://127.0.0.1:8080");
     HttpServer::new(|| App::new().service(index)
         .service(post)
         .service(fs::Files::new("/build", "build").show_files_listing())
-        .service(fs::Files::new("/posts/static", "build/static").show_files_listing()))
+        .service(fs::Files::new("/posts", "build/static").show_files_listing()))
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
@@ -35,10 +35,16 @@ async fn index(info: web::Query<Info>) -> fs::NamedFile {
 }
 
 
-/// returns the post page
+/// returns the post page or images in the posts
 #[get("/posts/{post_name}")]
 async fn post(path: web::Path<String>) -> fs::NamedFile {
     let post_name = path.into_inner();
+    // If there is a dot it means the request is a file (image)
+    if post_name.contains("."){
+        let path = format!("{}/{}/{}", InkerConfig::build_folder(), "static", post_name);
+        let file = fs::NamedFile::open(path);
+        return file.unwrap();
+    }
     let path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post_name, post_name);
     let file = fs::NamedFile::open(path);
     return file.unwrap();

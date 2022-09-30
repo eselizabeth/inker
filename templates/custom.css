@@ -4,30 +4,28 @@ img{
     height:auto
 }
 
-/* unvisited link */
+/*
 a:link{
-    color: green;
+    color: #ee5f5b;
     text-decoration: none;
 }
 
 
-/* visited link */
 a:visited {
-    color: green;
+    color: #ee5f5b;
     text-decoration: none;
 }
 
-/* mouse over link */
 a:hover {
-    color: green;
+    color: #ee5f5b;
     text-decoration: none;
 }
 
-/* selected link */
+
 a:active {
-    color: green;
+    color: #ee5f5b;
     text-decoration: none;
-}
+} */
 
 hr{
     color: black;

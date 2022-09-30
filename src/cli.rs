@@ -8,6 +8,7 @@ use notify::{Watcher, RecursiveMode, Config, RecommendedWatcher, EventKind};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use std::path::Path;
+use crate::webserver::{run_server};
 
 
 const CURRENT_COMMANDS: [&'static str; 6] = ["build", "clean", "new", "delete", "deleteall", "livereload"];
@@ -43,6 +44,7 @@ impl Cli<'_>{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
             let generator = Generator::new();
             generator.generate(false);
+            run_server();
         }
         else if self.command == "clean"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
