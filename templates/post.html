@@ -6,20 +6,30 @@
 {% endblock head %}
 
 {% block content %}
+
 <article>
   <div class="mt-5 text-end fw-light">
     <p>Posted by {{post.author}} <br> <i class="fa-regular fa-calendar"></i> {{post.date | date(format="%d %B %Y")}}</p>
   </div>
   <content>
     <div class="mt-5">
-      <h1>{{post.title}}</h1>
+      <h1 class="text-light">{{post.title}}</h1>
       <div class="text-end">
-        <a href="/"><i class="fa-solid fa-house"></i> Go back to main page</a>
+        <a href="/" class="text-success" style="text-decoration: none;"><i class="fa-solid fa-house"></i> Go back to main page</a>
       </div>
       <hr>
+      <div id="toc-div" class="card col-md-6 offset-md-3">
+        <div id="toc" class="card-body">
+        </div>
+      </div>
       <p class="fs-5">    
         {{post.content}}
       </p>
   </content>
 </article>
+<div>
+  <p class="text-center fs-6 text text-light fst-italic">build with <a class="text-info fw-semibold" href="https://github.com/denizaytacc/inker">inker</a> & <a class="text-info fw-semibold" href="https://getbootstrap.com/">bootstrap</a></p>
+</div>
 {% endblock content %}
+
+

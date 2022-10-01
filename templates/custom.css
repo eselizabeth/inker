@@ -4,29 +4,13 @@ img{
     height:auto
 }
 
-/*
-a:link{
-    color: #ee5f5b;
-    text-decoration: none;
-}
-
-
-a:visited {
-    color: #ee5f5b;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #ee5f5b;
-    text-decoration: none;
-}
-
-
-a:active {
-    color: #ee5f5b;
-    text-decoration: none;
-} */
-
 hr{
     color: black;
+}
+
+
+#toc a{
+    /* color: red; */
+    text-decoration: none;
+    display: block;
 }
