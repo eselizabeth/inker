@@ -1,3 +1,6 @@
 website-name: "@test name"
 posts-per-page: "4"
 pagination: "true"
+icon-path: "favicon.png"
+extra: 
+- { about.md: "about.html", visible-name: "about" }

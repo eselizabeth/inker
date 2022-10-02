@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %} {{title}} {% endblock title %}
+{% block head %}
+<link href="/build/bootstrap.min.css" rel="stylesheet">
+<link href="/build/custom.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+
+<article>
+  <content>
+    <div class="mt-5">
+      <div class="text-end">
+        <a href="/" class="text-success" style="text-decoration: none;"><i class="fa-solid fa-house"></i> Go back to main page</a>
+      </div>
+      <p class="fs-5 text-light">    
+        {{content}}
+      </p>
+  </content>
+</article>
+<div>
+  <p class="text-center fs-6 text text-light fst-italic">build with <a class="text-info fw-semibold" href="https://github.com/denizaytacc/inker">inker</a> & <a class="text-info fw-semibold" href="https://getbootstrap.com/">bootstrap</a></p>
+</div>
+{% endblock content %}
+
+

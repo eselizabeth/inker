@@ -10,8 +10,10 @@ pub async fn run_server() -> std::io::Result<()> {
     println!("web server started at: http://127.0.0.1:8080");
     HttpServer::new(|| App::new().service(index)
         .service(post)
+        .service(get_extra)
         .service(fs::Files::new("/build", "build").show_files_listing())
-        .service(fs::Files::new("/posts", "build/static").show_files_listing()))
+        .service(fs::Files::new("/posts", "build/static").show_files_listing())
+        .service(fs::Files::new("/static", "content/static").show_files_listing()))
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
@@ -46,6 +48,15 @@ async fn post(path: web::Path<String>) -> fs::NamedFile {
         return file.unwrap();
     }
     let path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post_name, post_name);
+    let file = fs::NamedFile::open(path);
+    return file.unwrap();
+}
+
+/// returns the extra page
+#[get("/{path}")]
+async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
+    let path_str = path.into_inner();
+    let path = format!("{}/{}.html", InkerConfig::build_folder(), path_str);
     let file = fs::NamedFile::open(path);
     return file.unwrap();
 }

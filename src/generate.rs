@@ -36,8 +36,7 @@ pub struct IndexPost{
 impl Post{
     pub fn new(post_name: &str) -> Result<Post, String>{
         let post_path = format!("{}/{}/{}.md", InkerConfig::posts_folder(), post_name, post_name);
-        let example = fs::read_to_string(post_path)
-            .expect("Couldn't read the file");
+        let example = fs::read_to_string(post_path).expect("Couldn't read the file");
         let (yaml_data, post_content) = Generator::parse_frontmatter(example.as_str());
         let content = Generator::md_to_html(post_content);
         let docs: Vec<Yaml> = YamlLoader::load_from_str(&yaml_data).unwrap();
@@ -73,7 +72,6 @@ pub struct Generator{
 }
 
 impl Generator{
-    /// Returns a Tera instance
     pub fn new() -> Generator{
         let mut tera = match Tera::new("templates/*") {
             Ok(file) => file,
@@ -85,7 +83,7 @@ impl Generator{
     }
 
     /// Generates post to the $BUILD folder
-    pub fn generate(self, call_from_livereload_: bool){
+    pub fn generate(&mut self, call_from_livereload_: bool){
         let posts: Vec<String> = FileHandler::get_posts();
         let mut post_indexes: Vec<IndexPost> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
@@ -101,6 +99,7 @@ impl Generator{
             });
             let mut context = tera::Context::new();
             context.insert("post", &new_post);
+            context.insert("icon_path", &self.config.icon_path);
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             Generator::write_to_a_file(&output_path, output);
             post_indexes.push(IndexPost{title: new_post.title, title_slug: post.to_string(), summary: new_post.summary, date: new_post.date, tags: new_post.tags});
@@ -108,7 +107,23 @@ impl Generator{
         if call_from_livereload_ == false{
             println!("successfully generated {} post(s)", posts.len());
         }
+        self.generate_extra();
         self.get_index(&mut post_indexes);
+    }
+
+    pub fn generate_extra(&mut self){
+        for content_info in &self.config.extra_contents{
+            let src_path = format!("{}/{}", InkerConfig::content_folder(), content_info.content_src);
+            let md_content = fs::read_to_string(src_path).expect("Couldn't read the file");
+            let content = Generator::md_to_html(md_content);
+            let mut context = tera::Context::new();
+            context.insert("content", &content);
+            context.insert("title", &content_info.title);
+            context.insert("icon_path", &self.config.icon_path);
+            let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
+            let output_path = format!("{}/{}", InkerConfig::build_folder(), content_info.template_src);
+            Generator::write_to_a_file(&output_path, output);
+        }
     }
 
     fn write_to_a_file(path: &str, output: String){
@@ -140,19 +155,18 @@ impl Generator{
         html::push_html(&mut html_output, parser);
         return html_output;
     }
-    /// Returns table of content made up from [h2..h6] of given string containing HTML
-    fn get_table_of_content(html: String) -> String{
-        return String::from("");
     
-}
+
     // gets the post names and generates main page for them
-    fn get_index(self, posts: &mut Vec<IndexPost>){
+    fn get_index(&mut self, posts: &mut Vec<IndexPost>){
         posts.sort_by_key(|d| d.date.clone());
         if self.config.pagination == false{
             let mut context = tera::Context::new();
             context.insert("pagination_enabled", &false);
             context.insert("website_name", &self.config.website_name);
             context.insert("posts", &posts);
+            context.insert("icon_path", &self.config.icon_path);
+            context.insert("contents", &self.config.extra_contents);
             let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
             let output_path = format!("{}/index.html", InkerConfig::build_folder()); 
             Generator::write_to_a_file(&output_path, output);
@@ -167,6 +181,8 @@ impl Generator{
                 context.insert("website_name", &self.config.website_name);
                 context.insert("page_counter", &(page_counter));
                 context.insert("max_page_counter", &max_page_counter);
+                context.insert("icon_path", &self.config.icon_path);
+                context.insert("contents", &self.config.extra_contents);
                 if posts.len() >= self.config.posts_per_page as usize{
                     let page_posts: Vec<IndexPost> = get_first_n_elements(posts, self.config.posts_per_page);
                     context.insert("posts", &page_posts);

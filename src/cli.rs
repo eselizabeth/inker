@@ -42,7 +42,7 @@ impl Cli<'_>{
         FileHandler::initalize();
         if self.command == "build"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
-            let generator = Generator::new();
+            let mut generator = Generator::new();
             generator.generate(false);
             run_server();
         }
@@ -89,7 +89,7 @@ impl Cli<'_>{
                 Ok(event) => match event.unwrap().kind {
                     EventKind::Access(_) => {
                         println!("changes found, reloading");
-                        let generator = Generator::new();
+                        let mut generator = Generator::new();
                         generator.generate(true);
                     }
                     _ => (),

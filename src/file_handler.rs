@@ -14,6 +14,7 @@ impl FileHandler{
     pub fn initalize(){
         let _ = FileHandler::create_folder(InkerConfig::posts_folder());
         let _ = FileHandler::create_folder(InkerConfig::template_folder());
+        let _ = FileHandler::create_folder(InkerConfig::content_folder());
     }
 
     /// For /posts folder creates a folder and .md file inside it with the slug version of given name
