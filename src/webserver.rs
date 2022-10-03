@@ -1,5 +1,4 @@
 use actix_files as fs;
-//use actix_files::{fs, NamedFile};
 use actix_web::{get, web};
 use serde::Deserialize;
 use crate::config::InkerConfig;
@@ -9,7 +8,7 @@ pub async fn run_server() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
     println!("web server started at: http://127.0.0.1:8080");
     HttpServer::new(|| App::new().service(index)
-        .service(post)
+        .service(get_posts)
         .service(get_extra)
         .service(fs::Files::new("/build", "build").show_files_listing())
         .service(fs::Files::new("/posts", "build/static").show_files_listing())
@@ -39,7 +38,7 @@ async fn index(info: web::Query<Info>) -> fs::NamedFile {
 
 /// returns the post page or images in the posts
 #[get("/posts/{post_name}")]
-async fn post(path: web::Path<String>) -> fs::NamedFile {
+async fn get_posts(path: web::Path<String>) -> fs::NamedFile {
     let post_name = path.into_inner();
     // If there is a dot it means the request is a file (image)
     if post_name.contains("."){
@@ -52,7 +51,7 @@ async fn post(path: web::Path<String>) -> fs::NamedFile {
     return file.unwrap();
 }
 
-/// returns the extra page
+/// returns the extra pages
 #[get("/{path}")]
 async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
     let path_str = path.into_inner();

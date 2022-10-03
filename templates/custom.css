@@ -8,6 +8,26 @@ hr{
     color: black;
 }
 
+/* unvisited link */
+a:link{
+    text-decoration: none;
+}
+
+
+/* visited link */
+a:visited {
+    text-decoration: none;
+}
+
+/* mouse over link */
+a:hover {
+    text-decoration: none;
+}
+
+/* selected link */
+a:active {
+    text-decoration: none;
+}
 
 #toc a{
     /* color: red; */

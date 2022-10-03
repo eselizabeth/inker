@@ -16,54 +16,8 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/0896d799a9.js" crossorigin="anonymous"></script>
-    <script>
-      var headers = document.querySelectorAll("h2, h3, h4, h5, h6");
-      console.log(headers);
-      const toc = document.getElementById('toc');
-      if (headers.length == 0){
-        const toc_div = document.getElementById('toc-div');
-        toc_div.remove();
-      }
-      const fragment = document.createDocumentFragment();
-      last_header = "h9";
-      let index = 1;
-      headers.forEach((header) =>{
-        header.id = string_to_slug(header.innerText);
-        header.className = "text-warning";
-        const anchor = document.createElement("a");
-        anchor.title = index.toString() + ". " + header.innerText;
-        anchor.innerText = anchor.title;
-        anchor.href = "#" + header.id;
-        anchor.className = "text-center text-light";
-        fragment.appendChild(anchor);
-        if (header.localName == last_header){
-          index += 0.1;
-        } 
-        else{
-          index += 1;
-          index = Math.floor(index);
-        }
-        last_header = header.localName;
-      });
-      toc.appendChild(fragment);
+    {% block custom_script %}
+    {% endblock custom_script %}
 
-      function string_to_slug (str) {
-          str = str.replace(/^\s+|\s+$/g, ''); // trim
-          str = str.toLowerCase();
-        
-          // remove accents, swap ñ for n, etc
-          var from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;";
-          var to   = "aaaaeeeeiiiioooouuuunc------";
-          for (var i=0, l=from.length ; i<l ; i++) {
-              str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
-          }
-
-          str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-              .replace(/\s+/g, '-') // collapse whitespace and replace by -
-              .replace(/-+/g, '-'); // collapse dashes
-
-          return str;
-      }
-    </script>
   </body>
 </html>

@@ -1,6 +1,7 @@
-website-name: "@test name"
+website-name: "inker"
 posts-per-page: "4"
 pagination: "true"
 icon-path: "favicon.png"
 extra: 
 - { about.md: "about.html", visible-name: "about" }
+- { projects.md: "projects.html", visible-name: "projects" }

@@ -8,9 +8,9 @@
 
 {% block content %}
     <div class="mt-5 text-center">
-        <p class="fs-1 text-light">{{website_name}}</p>
+        <p class="fs-1 text-light fw-lighter fw-bolder">{{website_name}}</p>
         {% for content_info in contents %}
-        <a href="{{content_info.title}}">{{content_info.title}}</a>
+        <i class="fa-solid fa-angle-right"></i><a href="{{content_info.title}}">{{content_info.title}}</a>
         {% endfor %}
     </div>
       <div class="mt-5">
