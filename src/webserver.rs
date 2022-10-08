@@ -2,10 +2,26 @@ use actix_files as fs;
 use actix_web::{get, web};
 use serde::Deserialize;
 use crate::config::InkerConfig;
+use actix_web::rt::{spawn, time};
+use std::time::{SystemTime, Duration};
+use std::fs::{read_dir, metadata};
+use crate::generate::{Generator};
+
+const CHANGE_DURATION: u64 = 3;
 
 #[actix_web::main]
-pub async fn run_server() -> std::io::Result<()> {
+pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
+    if live_reload{
+        spawn(async {
+            let mut interval = time::interval(Duration::from_secs(CHANGE_DURATION));        
+            loop {
+                interval.tick().await;
+                let _ = check_changes().await;
+            }
+        });
+    }
+
     println!("web server started at: http://127.0.0.1:8080");
     HttpServer::new(|| App::new().service(index)
         .service(get_posts)
@@ -58,4 +74,56 @@ async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
     let path = format!("{}/{}.html", InkerConfig::build_folder(), path_str);
     let file = fs::NamedFile::open(path);
     return file.unwrap();
+}
+
+/// Checkes input files for changes
+/// InkerConfig::template_folder()
+/// InkerConfig::posts_folder()
+/// "config.yaml"
+async fn check_changes(){
+    let current_time = SystemTime::now();
+    let posts_folder_changed = folder_changed(InkerConfig::posts_folder().to_string(), current_time);
+    let template_folder_changed = folder_changed(InkerConfig::template_folder().to_string(), current_time);
+    let config_changed = file_changed("config.yaml".to_string(), current_time);
+    if posts_folder_changed || template_folder_changed || config_changed{
+        println!("changes has been found, reloading");
+        let mut generator = Generator::new();
+        generator.generate(true);
+    }
+}
+
+/// iterates over a folder(s) recursively and checkes the if the file(s) inside has been modified in last $CHANGE_DURATION seconds, returns true if it is
+fn folder_changed(folder_name: String, current_time: SystemTime) -> bool{
+    for file in read_dir(folder_name).expect("this folder doesn't exist") {
+        if file.as_ref().unwrap().file_type().unwrap().is_file()  {
+                let file_metadata = metadata(file.unwrap().path()).unwrap();
+                if let Ok(change_time) = file_metadata.modified() {
+                    let time_difference = current_time.duration_since(change_time); 
+                    if time_difference.unwrap().as_secs() < CHANGE_DURATION{
+                        return true;
+                    };
+                } else {
+                    println!("not supported on this platform");
+                }
+            }
+        else if file.as_ref().unwrap().file_type().unwrap().is_dir(){
+            return folder_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
+            }
+    }
+    return false;
+}
+
+/// returns true if the file content has been changed over last $CHANGE_DURATION seconds
+fn file_changed(file_name: String, current_time: SystemTime) -> bool{
+    let file_metadata = metadata(file_name).unwrap();
+    if let Ok(change_time) = file_metadata.modified() {
+        let time_difference = current_time.duration_since(change_time); 
+        if time_difference.unwrap().as_secs() < CHANGE_DURATION{
+            return true;
+        };
+        }
+    else {
+        println!("not supported on this platform");
+    }
+    return false;
 }

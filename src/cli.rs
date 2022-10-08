@@ -2,12 +2,6 @@ use crate::generate::{Generator};
 use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
 
-extern crate notify;
-
-use notify::{Watcher, RecursiveMode, Config, RecommendedWatcher, EventKind};
-use std::sync::mpsc::channel;
-use std::time::Duration;
-use std::path::Path;
 use crate::webserver::{run_server};
 
 
@@ -44,7 +38,7 @@ impl Cli<'_>{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
             let mut generator = Generator::new();
             generator.generate(false);
-            run_server().expect("couldn't start the server");
+            run_server(false).expect("couldn't start the server");
         }
         else if self.command == "clean"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
@@ -76,27 +70,7 @@ impl Cli<'_>{
         }
         else if self.command == "livereload"{
             println!("watching for changes..");
-            let (sender, receiver) = channel();
-            let mut watcher: RecommendedWatcher = Watcher::new(sender, Config::default()
-            .with_poll_interval(Duration::from_secs(5))
-            .with_compare_contents(true)).unwrap();
-            watcher.watch(Path::new(InkerConfig::template_folder()), RecursiveMode::Recursive).unwrap();
-            watcher.watch(Path::new(InkerConfig::posts_folder()), RecursiveMode::Recursive).unwrap();
-            watcher.watch(Path::new("config.yaml"), RecursiveMode::Recursive).unwrap();
-
-            loop {
-                match receiver.recv() {
-                Ok(event) => match event.unwrap().kind {
-                    EventKind::Access(_) => {
-                        println!("changes found, reloading");
-                        let mut generator = Generator::new();
-                        generator.generate(true);
-                    }
-                    _ => (),
-                },
-                Err(e) => println!("watch error {:?}", e),
-                }
-            }
+            run_server(true).expect("couldn't start the server");
         }
     }
 }

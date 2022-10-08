@@ -40,5 +40,5 @@ TODO:
 - [x] Generating table of contents based on headers
 - [x] Pagination
 - [x] Custom page support
-- [ ] Documentation theme
-- [ ] Live reload
+- [] Documentation theme
+- [x] Live reload
