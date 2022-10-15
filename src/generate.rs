@@ -76,15 +76,16 @@ impl Generator{
 
     /// Generates post to the $BUILD folder
     pub fn generate(&mut self, call_from_livereload_: bool){
+        FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), "static"));
+        FileHandler::move_content(format!("content/static"), format!("build/static"),"md");
         let posts_names: Vec<String> = FileHandler::get_posts();
         let mut posts: Vec<Post> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
         for post in &posts_names{
             FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
-            let output_path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post, post);
-            let static_folder = format!("{}//static", InkerConfig::build_folder());
-            FileHandler::create_folder(static_folder.as_str());
-            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post), static_folder,"md");
+            let output_path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
+            let image_path = format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
+            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post), image_path,"md");
             let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
                 println!("inker failed: {err}");
                 process::exit(1);
@@ -113,15 +114,16 @@ impl Generator{
             context.insert("title", &content_info.title);
             context.insert("icon_path", &self.config.icon_path);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
-            let output_path = format!("{}/{}", InkerConfig::build_folder(), content_info.template_src);
+            let output_path = format!("{}/{}/index.html", InkerConfig::build_folder(), content_info.title);
+            FileHandler::create_folder(format!("build/{}", content_info.title).as_str());
             Generator::write_to_a_file(&output_path, output);
         }
     }
 
     fn write_to_a_file(path: &str, output: String){
         // moves css files in templates to $BUILD folder
-        FileHandler::move_content(InkerConfig::template_folder().to_string(), InkerConfig::build_folder().to_string(), "html");
-        let mut file = File::create(path).expect("Couldn't create the output fille");
+        FileHandler::move_content(InkerConfig::template_folder().to_string(), InkerConfig::build_folder().to_string() + "/static", "html");
+        let mut file = File::create(path).expect("Couldn't create the output file");
         write!(file, "{output}").expect("Couldn't write to the output file");
     
     }
@@ -167,6 +169,7 @@ impl Generator{
             let mut page_counter = 1;
             let max_page_counter = (posts.len() as f32/ self.config.posts_per_page as f32).ceil() as i32;
             let mut posts_left = true;
+            FileHandler::create_folder(format!("{}/page", InkerConfig::build_folder()).as_str());
             while posts_left{
                 let mut context = tera::Context::new();
                 context.insert("pagination_enabled", &true);
@@ -187,7 +190,12 @@ impl Generator{
                     }
                 }
                 let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
-                let output_path = format!("{}/index{}.html", InkerConfig::build_folder(), page_counter);
+                if page_counter == 1{
+                    let output_path = format!("{}/index.html", InkerConfig::build_folder());
+                    Generator::write_to_a_file(&output_path, output.clone());
+                }
+                FileHandler::create_folder(format!("{}/page/{}", InkerConfig::build_folder(), page_counter).as_str());
+                let output_path = format!("{}/page/{}/index.html", InkerConfig::build_folder(), page_counter);
                 Generator::write_to_a_file(&output_path, output);
                 page_counter += 1;
             }

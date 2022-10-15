@@ -1,11 +1,12 @@
 use actix_files as fs;
 use actix_web::{get, web};
-use serde::Deserialize;
 use crate::config::InkerConfig;
 use actix_web::rt::{spawn, time};
 use std::time::{SystemTime, Duration};
 use std::fs::{read_dir, metadata};
 use crate::generate::{Generator};
+use std::path::Path;
+
 
 const CHANGE_DURATION: u64 = 3;
 
@@ -22,33 +23,19 @@ pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
         });
     }
 
-    println!("web server started at: http://127.0.0.1:8080");
-    HttpServer::new(|| App::new().service(index)
+    println!("web server started at: http://0.0.0.0:8080");
+    HttpServer::new(|| App::new()
         .service(get_posts)
+        .service(fs::Files::new("/", "build").index_file("index.html"))
+        //.service(get_pages)
         .service(get_extra)
+        //.service(fs::Files::new("/posts", "build/posts").show_files_listing().index_file("index.html"))
         .service(fs::Files::new("/build", "build").show_files_listing())
-        .service(fs::Files::new("/posts", "build/static").show_files_listing())
-        .service(fs::Files::new("/static", "content/static").show_files_listing()))
-        .bind(("127.0.0.1", 8080))?
+        .service(fs::Files::new("/page", "build/page").show_files_listing())
+        .service(fs::Files::new("/static", "build/static").show_files_listing()))
+        .bind(("0.0.0.0", 8080))?
         .run()
         .await
-}
-
-#[derive(Deserialize)]
-struct Info {
-    page: Option<String>,
-}
-
-/// returns the index page
-#[get("/")]
-async fn index(info: web::Query<Info>) -> fs::NamedFile {
-    let path;
-    match &info.page {
-        Some(page_number) => path = format!("{}/index{}.html", InkerConfig::build_folder(), page_number),
-        None => path = format!("{}/index1.html", InkerConfig::build_folder()),
-    }
-    let file = fs::NamedFile::open(path);
-    return file.unwrap();
 }
 
 
@@ -58,11 +45,19 @@ async fn get_posts(path: web::Path<String>) -> fs::NamedFile {
     let post_name = path.into_inner();
     // If there is a dot it means the request is a file (image)
     if post_name.contains("."){
-        let path = format!("{}/{}/{}", InkerConfig::build_folder(), "static", post_name);
+        let mut folder_name = String::from("none");
+        for folder in read_dir(InkerConfig::posts_folder()).unwrap(){
+            let post_folder_name = folder.as_ref().unwrap().file_name().into_string().unwrap();
+            if Path::new(&format!("build/posts/{}/{post_name}", post_folder_name.to_string())).is_file(){
+                folder_name = post_folder_name.to_string().clone();
+                break;
+            }
+        }
+        let path = format!("{}/posts/{}/{}", InkerConfig::build_folder(), folder_name, post_name);
         let file = fs::NamedFile::open(path);
         return file.unwrap();
     }
-    let path = format!("{}/{}/{}/{}.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post_name, post_name);
+    let path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post_name);
     let file = fs::NamedFile::open(path);
     return file.unwrap();
 }
@@ -71,7 +66,7 @@ async fn get_posts(path: web::Path<String>) -> fs::NamedFile {
 #[get("/{path}")]
 async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
     let path_str = path.into_inner();
-    let path = format!("{}/{}.html", InkerConfig::build_folder(), path_str);
+    let path = format!("{}/{}/index.html", InkerConfig::build_folder() ,path_str);
     let file = fs::NamedFile::open(path);
     return file.unwrap();
 }

@@ -70,7 +70,7 @@ impl InkerConfig{
     pub fn template_folder() -> &'static str{
         return "templates";
     }
-        /// returns the default post template
+    /// returns the default post template
     pub fn post_template() -> String{
             let template = format!(r#"---
 title: "title"
