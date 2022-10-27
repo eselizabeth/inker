@@ -89,23 +89,16 @@ async fn check_changes(){
 
 /// iterates over a folder(s) recursively and checkes the if the file(s) inside has been modified in last $CHANGE_DURATION seconds, returns true if it is
 fn folder_changed(folder_name: String, current_time: SystemTime) -> bool{
+    let mut changed = false;
     for file in read_dir(folder_name).expect("this folder doesn't exist") {
         if file.as_ref().unwrap().file_type().unwrap().is_file()  {
-                let file_metadata = metadata(file.unwrap().path()).unwrap();
-                if let Ok(change_time) = file_metadata.modified() {
-                    let time_difference = current_time.duration_since(change_time); 
-                    if time_difference.unwrap().as_secs() < CHANGE_DURATION{
-                        return true;
-                    };
-                } else {
-                    println!("not supported on this platform");
-                }
+            changed = changed |  file_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
             }
         else if file.as_ref().unwrap().file_type().unwrap().is_dir(){
-            return folder_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
+            changed = changed | folder_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
             }
     }
-    return false;
+    return changed;
 }
 
 /// returns true if the file content has been changed over last $CHANGE_DURATION seconds

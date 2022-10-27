@@ -21,6 +21,7 @@ pub struct Post{
     summary: String,
     content: String,
     author: String,
+    draft: bool,
     tags: Vec<String>,
 }
 
@@ -54,7 +55,14 @@ impl Post{
             Ok(title) => title.to_string(),
             Err(_) => return Err(format!("couldn't find author in the post: {}", post_name)),
         };
-        Ok(Post{title, title_slug, date, summary, content, author,tags})
+        let draft: bool = match docs[0]["draft"].as_str().ok_or("couldn't convert option to result") {
+            Ok(title) => match title{
+                "false" => false,
+                _ => true,
+            },
+            Err(_) => return Err(format!("couldn't find draft in the post: {}", post_name)),
+        };
+        Ok(Post{title, title_slug, date, summary, content, author, draft, tags})
     }
 }
 
@@ -65,7 +73,8 @@ pub struct Generator{
 
 impl Generator{
     pub fn new() -> Generator{
-        let mut tera = match Tera::new("templates/*") {
+        let src = InkerConfig::template_folder() + "/*";
+        let mut tera = match Tera::new(src.as_str()) {
             Ok(file) => file,
             Err(error) => panic!("Problem with glob: {:?}", error),
         };
@@ -81,6 +90,7 @@ impl Generator{
         let posts_names: Vec<String> = FileHandler::get_posts();
         let mut posts: Vec<Post> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
+        let mut generated_posts: i32 = 0;
         for post in &posts_names{
             FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
             let output_path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
@@ -90,6 +100,10 @@ impl Generator{
                 println!("inker failed: {err}");
                 process::exit(1);
             });
+            if new_post.draft == false{
+                continue;
+            }
+            generated_posts += 1;
             let mut context = tera::Context::new();
             context.insert("post", &new_post);
             context.insert("icon_path", &self.config.icon_path);
@@ -98,7 +112,7 @@ impl Generator{
             posts.push(new_post);
         }
         if call_from_livereload_ == false{
-            println!("successfully generated {} post(s)", posts_names.len());
+            println!("successfully generated {} post(s)", generated_posts);
         }
         self.generate_extra();
         self.get_index(&mut posts);

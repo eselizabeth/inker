@@ -22,6 +22,8 @@ Current configuration:
 
 **website-name**: website of the name visible on tabs & website
 
+**template-name**: name of the template folder
+
 **posts-per-page**: how many pages should be shown per page, pagination has to be enabled for this one
 
 **pagination**: true or false

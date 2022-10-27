@@ -6,6 +6,7 @@ use serde::{Serialize, Deserialize};
 
 pub struct InkerConfig{
     pub website_name: String,
+    pub template_name: String,
     pub posts_per_page: i32,
     pub pagination: bool,
     pub icon_path: String,
@@ -45,6 +46,7 @@ impl InkerConfig{
         let configs: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let config = &configs[0];
         let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
+        let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
         let pagination: bool = config["pagination"].as_str().unwrap_or("false").to_string().parse().unwrap();
         let icon_path: String = config["icon-path"].as_str().unwrap_or("none").to_string().parse().unwrap();
@@ -56,7 +58,7 @@ impl InkerConfig{
             let visible_name = content.as_hash().unwrap().back().unwrap().1.as_str().unwrap();
             extra_contents.push(ContentInfo::new(src.to_string(), template.to_string(), visible_name.to_string()));
         }
-        InkerConfig{website_name, posts_per_page, pagination, icon_path, extra_contents}
+        InkerConfig{website_name, template_name, posts_per_page, pagination, icon_path, extra_contents}
     }
     pub fn build_folder() -> &'static str{
         return "build";
@@ -67,19 +69,22 @@ impl InkerConfig{
     pub fn posts_folder() -> &'static str{
         return "posts";
     }
-    pub fn template_folder() -> &'static str{
-        return "templates";
+    pub fn template_folder() -> std::string::String{
+        let template_name = InkerConfig::new().template_name;
+        return "templates/".to_string() + &template_name.to_string().clone();
+        //return ("templates".to_string() + &template_name.clone()).as_str();
     }
     /// returns the default post template
     pub fn post_template() -> String{
             let template = format!(r#"---
-title: "title"
+title: "post title"
 date: "{}"
-summary: "summary"
+summary: "post summary"
 author: "author"
+draft: "true"
 tags: [tag1, tag2]
 ---
-Enter your content here"#, InkerConfig::current_time());
+enter your content here"#, InkerConfig::current_time());
             return template;
         }
             /// returns the current time in ISO 8601
