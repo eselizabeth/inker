@@ -4,6 +4,7 @@ use std::{fs};
 use yaml_rust::{Yaml, YamlLoader};
 use serde::{Serialize, Deserialize};
 
+
 pub struct InkerConfig{
     pub website_name: String,
     pub template_name: String,
@@ -74,21 +75,24 @@ impl InkerConfig{
         return "templates/".to_string() + &template_name.to_string().clone();
         //return ("templates".to_string() + &template_name.clone()).as_str();
     }
-    /// returns the default post template
+    /// returns the default post template [from template/model.yaml]
     pub fn post_template() -> String{
-            let template = format!(r#"---
-title: "post title"
-date: "{}"
-summary: "post summary"
-author: "author"
-draft: "true"
-tags: [tag1, tag2]
----
-enter your content here"#, InkerConfig::current_time());
-            return template;
+    let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().template_name + "/model.yaml").expect("model.yaml is missing!");
+    let rest = format!("\ndate: {}\n---\nenter your content here", InkerConfig::current_time());
+    model = "---\n".to_string() + &model + &rest;
+//             let template = format!(r#"---
+// title: "post title"
+// date: "{}"
+// summary: "post summary"
+// author: "author"
+// draft: "true"
+// tags: [tag1, tag2]
+// ---
+// enter your content here"#, InkerConfig::current_time());
+            return model;
         }
-            /// returns the current time in ISO 8601
-    fn current_time() -> String{
+    /// returns the current time in ISO 8601
+    pub fn current_time() -> String{
         let now = SystemTime::now();
         let now: DateTime<Utc> = now.into();
         let now_iso = now.to_rfc3339();

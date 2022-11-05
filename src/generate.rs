@@ -8,21 +8,18 @@ use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
 use std::{process};
+use std::collections::HashMap;
 
 
 extern crate tera;
 
-
 #[derive(Serialize, Clone, Debug)]
 pub struct Post{
-    title: String,
     title_slug: String,
-    date: String,
-    summary: String,
     content: String,
-    author: String,
-    draft: bool,
-    tags: Vec<String>,
+    date: String,
+    info: HashMap<std::string::String, Vec<String>>,
+
 }
 
 impl Post{
@@ -33,36 +30,30 @@ impl Post{
         let (yaml_data, post_content) = Generator::parse_frontmatter(example.as_str());
         let content = Generator::md_to_html(post_content);
         let docs: Vec<Yaml> = YamlLoader::load_from_str(&yaml_data).unwrap();
-        let tags_return = docs[0]["tags"].clone();
-        // tags aren't mandatory so no checking
-        let mut tags: Vec<String> = Vec::new();
-        for tag in tags_return{
-            tags.push(tag.as_str().expect("couldn't find tags in the post: {post_name}").to_string());
+        let all_data = docs[0].clone();
+        let mut info = HashMap::new();
+        for hash_key in all_data.as_hash().unwrap().keys(){
+            let key = hash_key.clone().into_string().unwrap();
+            let value = &docs[0][key.as_str()].clone();
+            if value.is_array(){
+                let mut inner_values = Vec::new();
+                for inner_value in docs[0]["tags"].clone(){
+                    inner_values.push(inner_value.into_string().unwrap());
+                }
+                info.insert(key, inner_values);
+            }
+            else{
+                let mut inner_values = Vec::new();
+                inner_values.push(value.clone().into_string().unwrap());
+                info.insert(key, inner_values);
+            }
         }
-        let title = match docs[0]["title"].as_str().ok_or("couldn't convert option to result") {
-            Ok(title) => title.to_string(),
-            Err(_) => return Err(format!("couldn't find title in the post: {}", post_name)),
-        };
         let date = match docs[0]["date"].as_str().ok_or("couldn't convert option to result") {
             Ok(title) => title.to_string(),
             Err(_) => return Err(format!("couldn't find date in the post: {}", post_name)),
         };
-        let summary = match docs[0]["summary"].as_str().ok_or("couldn't convert option to result") {
-            Ok(title) => title.to_string(),
-            Err(_) => return Err(format!("couldn't find summary in the post: {}", post_name)),
-        };
-        let author = match docs[0]["author"].as_str().ok_or("couldn't convert option to result") {
-            Ok(title) => title.to_string(),
-            Err(_) => return Err(format!("couldn't find author in the post: {}", post_name)),
-        };
-        let draft: bool = match docs[0]["draft"].as_str().ok_or("couldn't convert option to result") {
-            Ok(title) => match title{
-                "false" => false,
-                _ => true,
-            },
-            Err(_) => return Err(format!("couldn't find draft in the post: {}", post_name)),
-        };
-        Ok(Post{title, title_slug, date, summary, content, author, draft, tags})
+        //println!("{:?}", info);
+        Ok(Post{title_slug, content, date, info})
     }
 }
 
@@ -100,7 +91,7 @@ impl Generator{
                 println!("inker failed: {err}");
                 process::exit(1);
             });
-            if new_post.draft == false{
+            if new_post.info["draft"][0] == "false".to_string(){
                 continue;
             }
             generated_posts += 1;

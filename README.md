@@ -44,3 +44,4 @@ TODO:
 - [x] Custom page support
 - [] Documentation theme
 - [x] Live reload
+- [x] Custom model data

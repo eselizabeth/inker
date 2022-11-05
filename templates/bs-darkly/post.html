@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} {{post.title}} {% endblock title %}
+{% block title %} {{post.info.title}} {% endblock title %}
 {% block head %}
 <link href="/static/bootstrap.min.css" rel="stylesheet">
 <link href="/static/custom.css" rel="stylesheet">
@@ -9,16 +9,16 @@
 
 <article class="mb-5">
   <div class="mt-5 text-end fw-light">
-    <p>Posted by {{post.author}} <br> <i class="fa-regular fa-calendar"></i> {{post.date | date(format="%d %B %Y")}}</p>
+    <p>Posted by {{post.info.author[0]}} <br> <i class="fa-regular fa-calendar"></i> {{post.date | date(format="%d %B %Y")}}</p>
   </div>
   <content>
     <div class="mt-5">
-      <h1 class="text-light">{{post.title}}</h1>
+      <h1 class="text-light">{{post.info.title[0]}}</h1>
       <div class="text-end">
         <a href="/" class="text-success" style="text-decoration: none;"><i class="fa-solid fa-house"></i> Go back to main page</a>
       </div>
       <hr>
-      <div id="toc-div" class="card col-md-6 offset-md-3">
+      <div id="toc-div" classf="card col-md-6 offset-md-3">
         <div id="toc" class="card-body">
         </div>
       </div>
