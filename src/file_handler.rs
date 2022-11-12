@@ -13,8 +13,10 @@ impl FileHandler{
     /// Creates posts and templates folder if they don't exist
     pub fn initalize(){
         let _ = FileHandler::create_folder(InkerConfig::posts_folder());
+        let _ = FileHandler::create_folder(InkerConfig::build_folder());
         let _ = FileHandler::create_folder(InkerConfig::template_folder().as_str());
         let _ = FileHandler::create_folder(InkerConfig::content_folder());
+        let _ = FileHandler::create_folder(&(InkerConfig::content_folder().to_owned() + &"/static".to_string()));
     }
 
     /// For /posts folder creates a folder and .md file inside it with the slug version of given name

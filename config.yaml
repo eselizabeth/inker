@@ -3,6 +3,3 @@ posts-per-page: "4"
 pagination: "true"
 icon-path: "favicon.png"
 template-name: "bs-darkly"
-extra: 
-- { about.md: "about.html", visible-name: "about" }
-- { projects.md: "projects.html", visible-name: "projects" }

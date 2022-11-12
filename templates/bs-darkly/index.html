@@ -25,13 +25,13 @@
                   <span class="text-success">{{post.date | date(format="%d %B %Y")}}</span>
                   <br>
                   <p style="display:inline;">
-                    {{post.info.summary}}
+                    {{post.info.summary[0]}}
                   </p>
                   <div class="text-end">
                     {% for tag in post.info.tags %}
                       <span class="badge rounded-pill text-bg-primary">{{tag}}</span>
                     {% endfor %}
-                    <a href="./posts/{{post.title_slug}}" class="text-success" style="text-decoration: none;">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
+                    <a href="/posts/{{post.title_slug}}" class="text-success" style="text-decoration: none;">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
                   </div>
 
                 </div>

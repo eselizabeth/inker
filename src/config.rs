@@ -53,12 +53,15 @@ impl InkerConfig{
         let icon_path: String = config["icon-path"].as_str().unwrap_or("none").to_string().parse().unwrap();
         let extra =  &config["extra"];
         let mut extra_contents: Vec<ContentInfo> = Vec::new();
-        for content in extra.as_vec().unwrap(){
-            let src = content.as_hash().unwrap().front().unwrap().0.as_str().unwrap();
-            let template = content.as_hash().unwrap().front().unwrap().1.as_str().unwrap();
-            let visible_name = content.as_hash().unwrap().back().unwrap().1.as_str().unwrap();
-            extra_contents.push(ContentInfo::new(src.to_string(), template.to_string(), visible_name.to_string()));
+        if !extra.is_badvalue(){
+            for content in extra.as_vec().unwrap(){
+                let src = content.as_hash().unwrap().front().unwrap().0.as_str().unwrap();
+                let template = content.as_hash().unwrap().front().unwrap().1.as_str().unwrap();
+                let visible_name = content.as_hash().unwrap().back().unwrap().1.as_str().unwrap();
+                extra_contents.push(ContentInfo::new(src.to_string(), template.to_string(), visible_name.to_string()));
+            }
         }
+
         InkerConfig{website_name, template_name, posts_per_page, pagination, icon_path, extra_contents}
     }
     pub fn build_folder() -> &'static str{

@@ -9,7 +9,7 @@ use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
 use std::{process};
 use std::collections::HashMap;
-
+use std::cmp::Reverse;
 
 extern crate tera;
 
@@ -18,8 +18,8 @@ pub struct Post{
     title_slug: String,
     content: String,
     date: String,
+    order: String, // because f64 doesn't implement Ord
     info: HashMap<std::string::String, Vec<String>>,
-
 }
 
 impl Post{
@@ -32,9 +32,13 @@ impl Post{
         let docs: Vec<Yaml> = YamlLoader::load_from_str(&yaml_data).unwrap();
         let all_data = docs[0].clone();
         let mut info = HashMap::new();
+        let order = docs[0]["order"].as_str().unwrap_or("9999.0").to_string();
         for hash_key in all_data.as_hash().unwrap().keys(){
             let key = hash_key.clone().into_string().unwrap();
             let value = &docs[0][key.as_str()].clone();
+            if key == "order" || key == "date"{
+                continue;
+            }
             if value.is_array(){
                 let mut inner_values = Vec::new();
                 for inner_value in docs[0]["tags"].clone(){
@@ -52,8 +56,7 @@ impl Post{
             Ok(title) => title.to_string(),
             Err(_) => return Err(format!("couldn't find date in the post: {}", post_name)),
         };
-        //println!("{:?}", info);
-        Ok(Post{title_slug, content, date, info})
+        Ok(Post{title_slug, content, date, order, info})
     }
 }
 
@@ -83,10 +86,6 @@ impl Generator{
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
         let mut generated_posts: i32 = 0;
         for post in &posts_names{
-            FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
-            let output_path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
-            let image_path = format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
-            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post), image_path,"md");
             let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
                 println!("inker failed: {err}");
                 process::exit(1);
@@ -95,12 +94,20 @@ impl Generator{
                 continue;
             }
             generated_posts += 1;
+            FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
+            let output_path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
+            let image_path = format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
+            FileHandler::move_content(format!("{}/{}", InkerConfig::posts_folder(), post), image_path,"md");
             let mut context = tera::Context::new();
             context.insert("post", &new_post);
             context.insert("icon_path", &self.config.icon_path);
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             Generator::write_to_a_file(&output_path, output);
             posts.push(new_post);
+        }
+        if generated_posts == 0{
+            println!("there isn't any post to generate");
+            process::exit(0);
         }
         if call_from_livereload_ == false{
             println!("successfully generated {} post(s)", generated_posts);
@@ -156,9 +163,10 @@ impl Generator{
     }
     
 
+
     // gets the post names and generates main page for them
     fn get_index(&mut self, posts: &mut Vec<Post>){
-        posts.sort_by_key(|d| d.date.clone());
+        posts.sort_by_key(|item| (item.order.clone(), Reverse(item.date.clone())));
         if self.config.pagination == false{
             let mut context = tera::Context::new();
             context.insert("pagination_enabled", &false);
