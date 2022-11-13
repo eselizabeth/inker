@@ -22,6 +22,36 @@ pub struct Post{
     info: HashMap<std::string::String, Vec<String>>,
 }
 
+#[derive(Serialize, Clone, Debug)]
+pub struct MainItem{
+    title: String,
+    title_slug: String,
+    order: String,
+    items: Vec<SubItem>,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct SubItem{
+    title: String,
+    title_slug: String,
+    order: String,
+}
+
+
+impl MainItem{
+    pub fn new(title: String, title_slug: String, order: String) ->  Self{
+        let items: Vec<SubItem> = Vec::new();
+        return MainItem{title, title_slug, order, items}
+    }
+}
+
+impl SubItem{
+    pub fn new(title: String, title_slug: String, order: String) -> Self{
+        return SubItem{title, title_slug, order}
+    }
+}
+
+
 impl Post{
     pub fn new(post_name: &str) -> Result<Post, String>{
         let title_slug = post_name.to_string();
@@ -85,6 +115,7 @@ impl Generator{
         let mut posts: Vec<Post> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), InkerConfig::posts_folder()));
         let mut generated_posts: i32 = 0;
+        let mut navigation: Vec<(String, String, String)> = Vec::new();
         for post in &posts_names{
             let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
                 println!("inker failed: {err}");
@@ -93,6 +124,7 @@ impl Generator{
             if new_post.info["draft"][0] == "false".to_string(){
                 continue;
             }
+            navigation.push((new_post.order.clone(), new_post.info["title"][0].clone(), new_post.title_slug.clone()));
             generated_posts += 1;
             FileHandler::create_folder(&format!("{}/{}/{}/", InkerConfig::build_folder(), InkerConfig::posts_folder(), post));
             let output_path = format!("{}/{}/{}/index.html", InkerConfig::build_folder(), InkerConfig::posts_folder(), post);
@@ -114,6 +146,9 @@ impl Generator{
         }
         self.generate_extra();
         self.get_index(&mut posts);
+        if self.config.generate_nav {
+            self.generate_navigation(&mut navigation);
+        }
     }
 
     pub fn generate_extra(&mut self){
@@ -163,6 +198,32 @@ impl Generator{
     }
     
 
+    fn generate_navigation(&mut self, posts: &mut Vec<(String, String, String)>){
+        // order, title, title_slug
+        posts.sort_by_key(|p| p.1.clone());
+        let mut navigator: Vec<MainItem> = Vec::new();
+        for post in posts{
+            let last_idx: usize = post.0.len() - 1;
+            if post.0.chars().nth(last_idx) == Some('0'){
+                let main_item = MainItem::new(post.1.clone(), post.2.clone(), post.0.clone());
+                navigator.push(main_item.clone());
+            }
+            else{
+                for main_item in &mut navigator{
+                    let sub_item = SubItem::new(post.1.clone(), post.2.clone(), post.0.clone());
+                    if main_item.order.split('.').collect::<Vec<&str>>()[0] == sub_item.order.split('.').collect::<Vec<&str>>()[0]{
+                        main_item.items.push(sub_item.clone());
+                    }
+                }
+            }
+        }
+        let mut context = tera::Context::new();
+        context.insert("navigator", &navigator.clone());
+        context.insert("icon_path", &self.config.icon_path);
+        let output = self.tera.render("nav_template.html", &context).expect("Couldn't render context to template");
+        Generator::write_to_a_file(format!("{}/nav.html", InkerConfig::build_folder()).as_str(), output);
+        }
+    
 
     // gets the post names and generates main page for them
     fn get_index(&mut self, posts: &mut Vec<Post>){
@@ -214,7 +275,6 @@ impl Generator{
             }
     
         }
-        
     }
 }
 

@@ -9,6 +9,7 @@ pub struct InkerConfig{
     pub website_name: String,
     pub template_name: String,
     pub posts_per_page: i32,
+    pub generate_nav: bool,
     pub pagination: bool,
     pub icon_path: String,
     pub extra_contents: Vec<ContentInfo>,
@@ -18,6 +19,7 @@ const DEFAULT_CONFIG: &str = r#"website-name: "inker website"
 posts-per-page: "4"
 pagination: "false"
 icon-path: "none"
+generate_nav: "false"
 "#;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,6 +52,7 @@ impl InkerConfig{
         let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
         let pagination: bool = config["pagination"].as_str().unwrap_or("false").to_string().parse().unwrap();
+        let generate_nav: bool = config["generate-nav"].as_str().unwrap_or("false").to_string().parse().unwrap();
         let icon_path: String = config["icon-path"].as_str().unwrap_or("none").to_string().parse().unwrap();
         let extra =  &config["extra"];
         let mut extra_contents: Vec<ContentInfo> = Vec::new();
@@ -61,8 +64,7 @@ impl InkerConfig{
                 extra_contents.push(ContentInfo::new(src.to_string(), template.to_string(), visible_name.to_string()));
             }
         }
-
-        InkerConfig{website_name, template_name, posts_per_page, pagination, icon_path, extra_contents}
+        InkerConfig{website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents}
     }
     pub fn build_folder() -> &'static str{
         return "build";

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} change me {% endblock title %}
+{% block head %}
+<link href="/static/bootstrap.min.css" rel="stylesheet">
+<link href="/static/custom.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+    {% set_global accordion_idx = 1 %}
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        {% for main_item in navigator %}
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                <strong>{{main_item.order}} - {{main_item.title}} </strong>
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTwo">
+                <div class="accordion-body">
+                <a href="/posts/{{main_item.title_slug}}">{{main_item.order}} - {{main_item.title}} </a>
+                </div>
+            </div>
+            {% for sub_item in main_item.items %}
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingThree">
+                    <div class="accordion-body">
+                    <a href="/posts/{{sub_item.title_slug}}">{{sub_item.order}} - {{sub_item.title}}</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+            </div>
+        {% endfor %}
+        
+    </div>
+{% endblock content %}
+
+

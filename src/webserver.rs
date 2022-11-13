@@ -23,17 +23,15 @@ pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
         });
     }
 
-    println!("web server started at: http://0.0.0.0:8080");
+    println!("web server started at: http://0.0.0.0:9090");
     HttpServer::new(|| App::new()
         .service(get_posts)
         .service(fs::Files::new("/", "build").index_file("index.html"))
-        //.service(get_pages)
         .service(get_extra)
-        //.service(fs::Files::new("/posts", "build/posts").show_files_listing().index_file("index.html"))
         .service(fs::Files::new("/build", "build").show_files_listing())
         .service(fs::Files::new("/page", "build/page").show_files_listing())
         .service(fs::Files::new("/static", "build/static").show_files_listing()))
-        .bind(("0.0.0.0", 8080))?
+        .bind(("0.0.0.0", 9090))?
         .run()
         .await
 }
