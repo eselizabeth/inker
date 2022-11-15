@@ -79,5 +79,24 @@ function string_to_slug (str) {
 
     return str;
 }
+
+
+  // Opens the tab of current page
+  let millisecondsDelay = 500; // 1000 = 1 sec
+  setTimeout(function()
+  {
+    // 7: https://
+    var website_link_without_http = window.location.href.substring(7, window.location.href.length); 
+    var current_page = website_link_without_http.substring(website_link_without_http.indexOf("/"), website_link_without_http.length);
+    console.log(current_page);
+    var sub_item_element = document.getElementById(current_page);
+    sub_item_element.style.fontWeight = "bold";
+    var parent_item = sub_item_element.parentElement;
+    parent_item.parentElement.className = "accordion-collapse collapse show";
+  },millisecondsDelay);
+
+
+
+
 </script>
 {% endblock custom_script %}

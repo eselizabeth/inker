@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %} {{website_name}} {% endblock title %}
+{% block head %}
+<link href="/static/bootstrap.min.css" rel="stylesheet">
+<link href="/static/custom.css" rel="stylesheet">
+{% endblock head %}
+
+
+{% block content %}
+  <div id="navigation" class="mt-5" style="padding-left: 20%;padding-right: 20%;">
+  </div>
+{% endblock content %}
+
+{% block custom_script %}
+<script>
+// Opens the tab of all pages since its main page
+let millisecondsDelay = 500; // 1000 = 1 sec
+setTimeout(function()
+{ 
+var all_items = document.querySelectorAll('[id*="collapse"]');
+for( i=0; i< all_items.length; i++ )
+{
+ var item = all_items[i];
+ item.className = "accordion-collapse collapse show";
+}
+},millisecondsDelay);
+
+</script>
+{% endblock custom_script %}
