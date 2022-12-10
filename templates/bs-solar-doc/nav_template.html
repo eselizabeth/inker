@@ -4,15 +4,14 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="heading{{loop.index}}">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{loop.index}}" aria-expanded="true" aria-controls="collapse{{loop.index}}">
-                {{main_item.order}} - {{main_item.title}}
+                {{main_item.title}}
             </button>
           </h2>
           <div id="collapse{{loop.index}}" class="accordion-collapse collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
-                <a id="/posts/{{main_item.title_slug}}" href="/posts/{{main_item.title_slug}}">{{main_item.order}} - {{main_item.title}} </a>
-                <br>
                 {% for sub_item in main_item.items %}
                 <a id="/posts/{{sub_item.title_slug}}" href="/posts/{{sub_item.title_slug}}">{{sub_item.order}} - {{sub_item.title}}</a>
+                <br>
                 {% endfor %}
             </div>
           </div>

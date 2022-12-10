@@ -13,6 +13,7 @@ pub struct InkerConfig{
     pub pagination: bool,
     pub icon_path: String,
     pub extra_contents: Vec<ContentInfo>,
+    pub headers: Vec<String>,
 }
 
 const DEFAULT_CONFIG: &str = r#"website-name: "inker website"
@@ -64,7 +65,14 @@ impl InkerConfig{
                 extra_contents.push(ContentInfo::new(src.to_string(), template.to_string(), visible_name.to_string()));
             }
         }
-        InkerConfig{website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents}
+        let header_values =  &config["headers"];
+        let mut headers: Vec<String> = Vec::new();
+        if !header_values.is_badvalue(){
+            for header in header_values.as_vec().unwrap(){
+                headers.push(header.as_str().unwrap().to_string());
+            }
+        }
+        InkerConfig{website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
     }
     pub fn build_folder() -> &'static str{
         return "build";
@@ -78,23 +86,13 @@ impl InkerConfig{
     pub fn template_folder() -> std::string::String{
         let template_name = InkerConfig::new().template_name;
         return "templates/".to_string() + &template_name.to_string().clone();
-        //return ("templates".to_string() + &template_name.clone()).as_str();
     }
     /// returns the default post template [from template/model.yaml]
     pub fn post_template() -> String{
-    let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().template_name + "/model.yaml").expect("model.yaml is missing!");
-    let rest = format!("\ndate: {}\n---\nenter your content here", InkerConfig::current_time());
-    model = "---\n".to_string() + &model + &rest;
-//             let template = format!(r#"---
-// title: "post title"
-// date: "{}"
-// summary: "post summary"
-// author: "author"
-// draft: "true"
-// tags: [tag1, tag2]
-// ---
-// enter your content here"#, InkerConfig::current_time());
-            return model;
+        let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().template_name + "/model.yaml").expect("model.yaml is missing!");
+        let rest = format!("\ndate: {}\n---\nenter your content here", InkerConfig::current_time());
+        model = "---\n".to_string() + &model + &rest;
+        return model;
         }
     /// returns the current time in ISO 8601
     pub fn current_time() -> String{

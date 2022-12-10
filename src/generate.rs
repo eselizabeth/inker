@@ -1,3 +1,4 @@
+use std::thread::current;
 use std::{fs};
 use tera::{Tera};
 use serde::{Serialize};
@@ -7,6 +8,7 @@ use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
+use crate::main;
 use std::{process};
 use std::collections::HashMap;
 use std::cmp::Reverse;
@@ -25,7 +27,7 @@ pub struct Post{
 #[derive(Serialize, Clone, Debug)]
 pub struct MainItem{
     title: String,
-    title_slug: String,
+    // title_slug: String,
     order: String,
     items: Vec<SubItem>,
 }
@@ -39,9 +41,10 @@ pub struct SubItem{
 
 
 impl MainItem{
-    pub fn new(title: String, title_slug: String, order: String) ->  Self{
+    pub fn new(title: String) ->  Self{
         let items: Vec<SubItem> = Vec::new();
-        return MainItem{title, title_slug, order, items}
+        let order = title.split('.').collect::<Vec<&str>>()[0].to_string();
+        return MainItem{title, order, items}
     }
 }
 
@@ -199,24 +202,28 @@ impl Generator{
     
 
     fn generate_navigation(&mut self, posts: &mut Vec<(String, String, String)>){
-        // order, title, title_slug
-        posts.sort_by_key(|p| p.1.clone());
+        posts.sort_by_key(|p| p.0.clone());
         let mut navigator: Vec<MainItem> = Vec::new();
+        let mut main_headers = self.config.headers.clone();
+        let mut current_header = MainItem::new(main_headers.remove(0));
         for post in posts{
-            let last_idx: usize = post.0.len() - 1;
-            if post.0.chars().nth(last_idx) == Some('0'){
-                let main_item = MainItem::new(post.1.clone(), post.2.clone(), post.0.clone());
-                navigator.push(main_item.clone());
+            if post.0.chars().nth(0) == current_header.order.chars().nth(0){
+                // do nothing
             }
             else{
-                for main_item in &mut navigator{
-                    let sub_item = SubItem::new(post.1.clone(), post.2.clone(), post.0.clone());
-                    if main_item.order.split('.').collect::<Vec<&str>>()[0] == sub_item.order.split('.').collect::<Vec<&str>>()[0]{
-                        main_item.items.push(sub_item.clone());
-                    }
+                navigator.push(current_header);
+                if main_headers.len() > 0{
+                    current_header = MainItem::new(main_headers.remove(0));
                 }
-            }
+                else{
+                    current_header =  MainItem::new("none".to_string());
+                }
+                }
+            let sub_item = SubItem::new(post.1.clone(), post.2.clone(), post.0.clone());
+            current_header.items.push(sub_item.clone());
         }
+        navigator.push(current_header);
+        
         let mut context = tera::Context::new();
         context.insert("navigator", &navigator.clone());
         context.insert("icon_path", &self.config.icon_path);

@@ -18,7 +18,7 @@ pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
             let mut interval = time::interval(Duration::from_secs(CHANGE_DURATION));        
             loop {
                 interval.tick().await;
-                let _ = check_changes().await;
+                let any_change = check_changes().await;
             }
         });
     }
