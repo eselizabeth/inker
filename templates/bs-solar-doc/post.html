@@ -41,7 +41,6 @@
     // 7: https://
     var website_link_without_http = window.location.href.substring(7, window.location.href.length); 
     var current_page = website_link_without_http.substring(website_link_without_http.indexOf("/"), website_link_without_http.length);
-    console.log(current_page);
     var sub_item_element = document.getElementById(current_page);
     sub_item_element.style.fontWeight = "bold";
     var parent_item = sub_item_element.parentElement;
@@ -50,6 +49,22 @@
 
 
 
+
+async function updateMessage() {
+  try {
+    const response = await fetch('/change');
+    const message = await response.text();
+    console.log(message);
+  
+    if (message === "refresh") {
+      location.reload();
+    }
+  } catch (e) {
+    // do nothing
+  }
+    
+}
+setInterval(updateMessage, 3000);
 
 </script>
 {% endblock custom_script %}

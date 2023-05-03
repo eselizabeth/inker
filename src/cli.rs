@@ -69,6 +69,9 @@ impl Cli<'_>{
             }
         }
         else if self.command == "livereload"{
+            FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
+            let mut generator = Generator::new();
+            generator.generate(false);
             println!("watching for changes..");
             run_server(true).expect("couldn't start the server");
         }

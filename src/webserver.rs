@@ -1,37 +1,57 @@
 use actix_files as fs;
-use actix_web::{get, web};
+use actix_web::{get, web, App, HttpResponse, HttpServer};
 use crate::config::InkerConfig;
 use actix_web::rt::{spawn, time};
 use std::time::{SystemTime, Duration};
 use std::fs::{read_dir, metadata};
 use crate::generate::{Generator};
 use std::path::Path;
-
+use actix_web::rt::time::sleep;
 
 const CHANGE_DURATION: u64 = 3;
+
+#[get("/change")]
+async fn change() -> HttpResponse {
+    sleep(Duration::from_secs(CHANGE_DURATION)).await;
+    let any_change: bool = check_changes().await;
+    if any_change {
+        println!("{}", any_change);
+        send_refresh().await
+    }
+    else{
+        send_norefresh().await
+    }
+}
+
+async fn send_refresh() -> HttpResponse {
+    let message = "refresh";
+    HttpResponse::build(actix_web::http::StatusCode::OK)
+        .content_type("text/event-stream")
+        .header("Cache-Control", "no-cache")
+        .body(message)
+}
+
+async fn send_norefresh() -> HttpResponse {
+    let message = "norefresh";
+    HttpResponse::build(actix_web::http::StatusCode::OK)
+        .content_type("text/event-stream")
+        .header("Cache-Control", "no-cache")
+        .body(message)
+}
 
 #[actix_web::main]
 pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
-    if live_reload{
-        spawn(async {
-            let mut interval = time::interval(Duration::from_secs(CHANGE_DURATION));        
-            loop {
-                interval.tick().await;
-                let any_change = check_changes().await;
-            }
-        });
-    }
-
-    println!("web server started at: http://0.0.0.0:9090");
+    println!("web server started at: http://0.0.0.0:8080");
     HttpServer::new(|| App::new()
+        .service(change)
         .service(get_posts)
         .service(fs::Files::new("/", "build").index_file("index.html"))
         .service(get_extra)
         .service(fs::Files::new("/build", "build").show_files_listing())
         .service(fs::Files::new("/page", "build/page").show_files_listing())
         .service(fs::Files::new("/static", "build/static").show_files_listing()))
-        .bind(("0.0.0.0", 9090))?
+        .bind(("0.0.0.0", 8080))?
         .run()
         .await
 }
@@ -73,7 +93,7 @@ async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
 /// InkerConfig::template_folder()
 /// InkerConfig::posts_folder()
 /// "config.yaml"
-async fn check_changes(){
+async fn check_changes() -> bool{
     let current_time = SystemTime::now();
     let posts_folder_changed = folder_changed(InkerConfig::posts_folder().to_string(), current_time);
     let template_folder_changed = folder_changed(InkerConfig::template_folder().to_string(), current_time);
@@ -82,7 +102,9 @@ async fn check_changes(){
         println!("changes has been found, reloading");
         let mut generator = Generator::new();
         generator.generate(true);
+        return true;
     }
+    return false;
 }
 
 /// iterates over a folder(s) recursively and checkes the if the file(s) inside has been modified in last $CHANGE_DURATION seconds, returns true if it is
