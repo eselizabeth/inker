@@ -6,6 +6,7 @@ use serde::{Serialize, Deserialize};
 
 
 pub struct InkerConfig{
+    pub port: u16,
     pub website_name: String,
     pub template_name: String,
     pub posts_per_page: i32,
@@ -50,6 +51,7 @@ impl InkerConfig{
         }
         let configs: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let config = &configs[0];
+        let port: u16 = config["port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
         let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
         let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
@@ -73,7 +75,7 @@ impl InkerConfig{
                 headers.push(header.as_str().unwrap().to_string());
             }
         }
-        InkerConfig{website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
+        InkerConfig{port, website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
     }
     pub fn build_folder() -> &'static str{
         return "build";

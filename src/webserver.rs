@@ -41,8 +41,9 @@ async fn send_norefresh() -> HttpResponse {
 
 #[actix_web::main]
 pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
+    let server_port: u16 = InkerConfig::new().port;
     use actix_web::{App, HttpServer};
-    println!("web server started at: http://0.0.0.0:8080");
+    println!("web server started at: http://0.0.0.0:{}", server_port);
     HttpServer::new(|| App::new()
         .service(change)
         .service(get_posts)
@@ -51,7 +52,7 @@ pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
         .service(fs::Files::new("/build", "build").show_files_listing())
         .service(fs::Files::new("/page", "build/page").show_files_listing())
         .service(fs::Files::new("/static", "build/static").show_files_listing()))
-        .bind(("0.0.0.0", 8080))?
+        .bind(("0.0.0.0", server_port))?
         .run()
         .await
 }

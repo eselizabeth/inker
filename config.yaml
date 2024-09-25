@@ -1,3 +1,4 @@
+port: "5004"
 website-name: "inker"
 posts-per-page: "4"
 pagination: "false"
