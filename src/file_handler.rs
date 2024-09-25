@@ -26,13 +26,13 @@ impl FileHandler{
         let file_name = format!("{}/{}", folder_name, (post_slug.clone() + ".md"));
         let result: bool = FileHandler::create_folder(&folder_name);
         if result == false{
-            println!("this post already exists: {}", post_name.clone());
+            println!("Please try an another name, the post with given name already exists: {}", post_name.clone());
         }
         else{
             let mut file = File::create(file_name).expect("Couldn't create the output file");
             let post_template = InkerConfig::post_template();
             write!(file, "{post_template}").expect("Couldn't write to the output file");
-            println!("successfully created post: {}", post_name);
+            println!("The post has been successfully created: {}", post_name);
         }
 
     }
@@ -43,10 +43,10 @@ impl FileHandler{
         let folder_name = format!("{}/{}", InkerConfig::posts_folder(), post_slug);
         let result: bool = FileHandler::delete_folder(&folder_name);
         if result == true{
-            println!("successfully deleted post: {}", post_name);
+            println!("The post has been successfully deleted");
         }
         else if result == false{
-            println!("this post doesn't exist: {}", post_name);
+            println!("The post with given name doesn't exist: {}", post_name);
         }
     }
 
@@ -80,6 +80,7 @@ impl FileHandler{
     pub fn create_folder(folder_name: &str) -> bool{
         let folder_exists: bool = Path::new(folder_name).is_dir();
         if !folder_exists{
+            println!("{}", folder_name);
             fs::create_dir(folder_name).expect("Couldn't create the folder");
             return true;
         }

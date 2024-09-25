@@ -16,7 +16,8 @@ pub struct InkerConfig{
     pub headers: Vec<String>,
 }
 
-const DEFAULT_CONFIG: &str = r#"website-name: "inker website"
+const DEFAULT_CONFIG: &str = r#"port: 8080
+website-name: "inker website"
 posts-per-page: "4"
 pagination: "false"
 icon-path: "none"
@@ -44,8 +45,8 @@ impl InkerConfig{
             config_content = config_file.unwrap();
         }
         else{
-            println!("config.yaml doesn't exist, getting the default content");
             config_content = DEFAULT_CONFIG.to_string();
+            println!("config.yaml file doesn't exist, the default configuration will be used:\n{}", {config_content.clone()});
         }
         let configs: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let config = &configs[0];
@@ -90,11 +91,11 @@ impl InkerConfig{
     /// returns the default post template [from template/model.yaml]
     pub fn post_template() -> String{
         let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().template_name + "/model.yaml").expect("model.yaml is missing!");
-        let rest = format!("\ndate: {}\n---\nenter your content here", InkerConfig::current_time());
+        let rest = format!("\ndate: {} # this field is mandatory to have \n---\nenter your content here", InkerConfig::current_time());
         model = "---\n".to_string() + &model + &rest;
         return model;
         }
-    /// returns the current time in ISO 8601
+    /// returns the current time in ISO 8601 format
     pub fn current_time() -> String{
         let now = SystemTime::now();
         let now: DateTime<Utc> = now.into();

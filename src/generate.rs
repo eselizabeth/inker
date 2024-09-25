@@ -74,7 +74,7 @@ impl Post{
             }
             if value.is_array(){
                 let mut inner_values = Vec::new();
-                for inner_value in docs[0]["tags"].clone(){
+                for inner_value in docs[0][key.as_str()].clone(){
                     inner_values.push(inner_value.into_string().unwrap());
                 }
                 info.insert(key, inner_values);
@@ -124,7 +124,7 @@ impl Generator{
                 println!("inker failed: {err}");
                 process::exit(1);
             });
-            if new_post.info["draft"][0] == "false".to_string(){
+            if new_post.info["draft"][0] == "true".to_string(){
                 continue;
             }
             navigation.push((new_post.order.clone(), new_post.info["title"][0].clone(), new_post.title_slug.clone()));

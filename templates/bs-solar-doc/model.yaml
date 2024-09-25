@@ -1,6 +1,6 @@
 title: "post title"
 summary: "post summary"
 author: "author"
-draft: "false"
-order: "1.0"
-tags: [tag1, tag2]
+draft: "false" # if it's set to true, the post will not be generated
+order: "1.0" # order of the page, the 
+tags: [tag1, tag2] # not mandatory

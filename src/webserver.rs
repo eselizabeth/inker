@@ -27,7 +27,7 @@ async fn send_refresh() -> HttpResponse {
     let message = "refresh";
     HttpResponse::build(actix_web::http::StatusCode::OK)
         .content_type("text/event-stream")
-        .header("Cache-Control", "no-cache")
+        .append_header(("Cache-Control", "no-cache"))
         .body(message)
 }
 
@@ -35,7 +35,7 @@ async fn send_norefresh() -> HttpResponse {
     let message = "norefresh";
     HttpResponse::build(actix_web::http::StatusCode::OK)
         .content_type("text/event-stream")
-        .header("Cache-Control", "no-cache")
+        .append_header(("Cache-Control", "no-cache"))
         .body(message)
 }
 
