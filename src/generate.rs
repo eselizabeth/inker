@@ -144,9 +144,6 @@ impl Generator{
             println!("there isn't any post to generate");
             process::exit(0);
         }
-        if call_from_livereload_ == false{
-            println!("successfully generated {} post(s)", generated_posts);
-        }
         self.generate_extra();
         self.get_index(&mut posts);
         if self.config.generate_nav {

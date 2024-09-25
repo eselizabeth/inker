@@ -8,14 +8,14 @@ use crate::generate::{Generator};
 use std::path::Path;
 use actix_web::rt::time::sleep;
 
-const CHANGE_DURATION: u64 = 3;
+const CHANGE_DURATION: u64 = 5;
 
 #[get("/change")]
 async fn change() -> HttpResponse {
     sleep(Duration::from_secs(CHANGE_DURATION)).await;
     let any_change: bool = check_changes().await;
+    println!("{}", any_change);
     if any_change {
-        println!("{}", any_change);
         send_refresh().await
     }
     else{
@@ -113,10 +113,10 @@ fn folder_changed(folder_name: String, current_time: SystemTime) -> bool{
     let mut changed = false;
     for file in read_dir(folder_name).expect("this folder doesn't exist") {
         if file.as_ref().unwrap().file_type().unwrap().is_file()  {
-            changed = changed |  file_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
+            changed |= file_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
             }
         else if file.as_ref().unwrap().file_type().unwrap().is_dir(){
-            changed = changed | folder_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
+            changed |= folder_changed(file.unwrap().path().into_os_string().into_string().unwrap(), current_time);
             }
     }
     return changed;
@@ -126,10 +126,11 @@ fn folder_changed(folder_name: String, current_time: SystemTime) -> bool{
 fn file_changed(file_name: String, current_time: SystemTime) -> bool{
     let file_metadata = metadata(file_name).unwrap();
     if let Ok(change_time) = file_metadata.modified() {
-        let time_difference = current_time.duration_since(change_time); 
-        if time_difference.unwrap().as_secs() < CHANGE_DURATION{
+        let time_difference = current_time.duration_since(change_time);
+        // if the raw value of CHANGE_DURATION is used, the change might not get detected by few seconds
+        if time_difference.clone().unwrap().as_secs() < CHANGE_DURATION + 3{
             return true;
-        };
+        }
         }
     else {
         println!("not supported on this platform");

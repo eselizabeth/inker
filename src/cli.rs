@@ -29,7 +29,7 @@ impl Cli<'_>{
         if !CURRENT_COMMANDS.contains(&command.as_str()){
             return Err("you entered an unknown command. current commands are \nbuild\nclean\nnew\ndelete\ndeleteall");
         }
-        let all_args = args.clone();
+        let all_args = args;
         Ok(Cli{command, all_args})
     }
     pub fn handle_input(&self){
@@ -71,7 +71,7 @@ impl Cli<'_>{
         else if self.command == "livereload"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
             let mut generator = Generator::new();
-            generator.generate(false);
+            generator.generate(true);
             println!("watching for changes..");
             run_server(true).expect("couldn't start the server");
         }
