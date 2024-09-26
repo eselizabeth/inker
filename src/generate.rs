@@ -1,4 +1,3 @@
-use std::thread::current;
 use std::{fs};
 use tera::{Tera};
 use serde::{Serialize};
@@ -8,7 +7,6 @@ use pulldown_cmark::{Parser, Options, html};
 use yaml_rust::{Yaml, YamlLoader};
 use crate::file_handler::{FileHandler};
 use crate::config::{InkerConfig};
-use crate::main;
 use std::{process};
 use std::collections::HashMap;
 use std::cmp::Reverse;
@@ -27,7 +25,6 @@ pub struct Post{
 #[derive(Serialize, Clone, Debug)]
 pub struct MainItem{
     title: String,
-    // title_slug: String,
     order: String,
     items: Vec<SubItem>,
 }
@@ -111,7 +108,7 @@ impl Generator{
     }
 
     /// Generates post to the $BUILD folder
-    pub fn generate(&mut self, call_from_livereload_: bool){
+    pub fn generate(&mut self){
         FileHandler::create_folder(&format!("{}/{}", InkerConfig::build_folder(), "static"));
         FileHandler::move_content(format!("content/static"), format!("build/static"),"md");
         let posts_names: Vec<String> = FileHandler::get_posts();

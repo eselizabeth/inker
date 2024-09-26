@@ -1,7 +1,6 @@
 use actix_files as fs;
-use actix_web::{get, web, App, HttpResponse, HttpServer};
+use actix_web::{get, web, HttpResponse};
 use crate::config::InkerConfig;
-use actix_web::rt::{spawn, time};
 use std::time::{SystemTime, Duration};
 use std::fs::{read_dir, metadata};
 use crate::generate::{Generator};
@@ -14,8 +13,8 @@ const CHANGE_DURATION: u64 = 5;
 async fn change() -> HttpResponse {
     sleep(Duration::from_secs(CHANGE_DURATION)).await;
     let any_change: bool = check_changes().await;
-    println!("{}", any_change);
     if any_change {
+        println!("changes has been found, reloading");
         send_refresh().await
     }
     else{
@@ -40,7 +39,7 @@ async fn send_norefresh() -> HttpResponse {
 }
 
 #[actix_web::main]
-pub async fn run_server(live_reload: bool) -> std::io::Result<()> {
+pub async fn run_server() -> std::io::Result<()> {
     let server_port: u16 = InkerConfig::new().port;
     use actix_web::{App, HttpServer};
     println!("web server started at: http://0.0.0.0:{}", server_port);
@@ -100,9 +99,8 @@ async fn check_changes() -> bool{
     let template_folder_changed = folder_changed(InkerConfig::template_folder().to_string(), current_time);
     let config_changed = file_changed("config.yaml".to_string(), current_time);
     if posts_folder_changed || template_folder_changed || config_changed{
-        println!("changes has been found, reloading");
         let mut generator = Generator::new();
-        generator.generate(true);
+        generator.generate();
         return true;
     }
     return false;

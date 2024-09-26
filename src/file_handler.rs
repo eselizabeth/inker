@@ -80,7 +80,6 @@ impl FileHandler{
     pub fn create_folder(folder_name: &str) -> bool{
         let folder_exists: bool = Path::new(folder_name).is_dir();
         if !folder_exists{
-            println!("{}", folder_name);
             fs::create_dir(folder_name).expect("Couldn't create the folder");
             return true;
         }
