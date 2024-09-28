@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %} {{post.info.title[0]}} {% endblock title %}
 {% block head %}
-<link href="/static/bootstrap.min.css" rel="stylesheet">
-<link href="/static/custom.css" rel="stylesheet">
+<link href="{{base_url}}/static/bootstrap.min.css" rel="stylesheet">
+<link href="{{base_url}}/static/custom.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
@@ -15,7 +15,7 @@
     <div class="mt-5">
       <h1 class="text-light">{{post.info.title[0]}}</h1>
       <div class="text-end">
-        <a href="/" class="text-success" style="text-decoration: none;"><i class="fa-solid fa-house"></i> Go back to main page</a>
+        <a href="{{base_url}}" class="text-success" style="text-decoration: none;"><i class="fa-solid fa-house"></i> Go back to main page</a>
       </div>
       <hr>
       <div id="toc-div" classf="card col-md-6 offset-md-3">
@@ -38,24 +38,14 @@ if (headers.length == 0){
   toc_div.remove();
 }
 const fragment = document.createDocumentFragment();
-last_header = "h9";
-let index = 1;
 headers.forEach((header) =>{
   header.id = string_to_slug(header.innerText);
   header.className = "text-warning";
   const anchor = document.createElement("a");
-  anchor.innerText = index.toString() + ". " + header.innerText;
+  anchor.innerText = header.innerText;
   anchor.href = "#" + header.id;
   anchor.className = "text-center text-light";
   fragment.appendChild(anchor);
-  if (header.localName == last_header){
-    index += 0.1;
-  } 
-  else{
-    index += 1;
-    index = Math.floor(index);
-  }
-  last_header = header.localName;
 });
 toc.appendChild(fragment);
 

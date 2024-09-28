@@ -42,7 +42,7 @@ async fn send_norefresh() -> HttpResponse {
 pub async fn run_server() -> std::io::Result<()> {
     let server_port: u16 = InkerConfig::new().port;
     use actix_web::{App, HttpServer};
-    println!("web server started at: http://0.0.0.0:{}", server_port);
+    println!("the web server is started at: http://0.0.0.0:{}", server_port);
     HttpServer::new(|| App::new()
         .service(change)
         .service(get_posts)
@@ -99,7 +99,7 @@ async fn check_changes() -> bool{
     let template_folder_changed = folder_changed(InkerConfig::template_folder().to_string(), current_time);
     let config_changed = file_changed("config.yaml".to_string(), current_time);
     if posts_folder_changed || template_folder_changed || config_changed{
-        let mut generator = Generator::new();
+        let mut generator = Generator::new(false);
         generator.generate();
         return true;
     }

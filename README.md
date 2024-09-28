@@ -1,40 +1,47 @@
-A static website designed to be simple as possible.
+static site generator using tera template engine
 
-**Current commands**
+directory structure
+```yaml
+posts/          # where the posts will be written in markdown
+content/        # static content for template usage
+build/          # where the webserver generated website for internal usage
+publish/        # where the final output of the static website will be generated
+templates/      # template folder
+config.yaml     # configuration file
+./inker:        # executable
+```
 
-**new** <postname>: creates a post with given name 
+**current commands**
 
-*and the markdown file can be found in posts folder with name as slugged, eg. its cold outside -> its-cold-outside*:
+**new** postname: creates a post with given name inside the posts folder
 
-**build**: generates a static website based on what is inside the posts folder and opens a webserver at given port in configuration file
-
-**livereload**: regenerates the website based on the changes, behaves same as build command
+**server**: opens a webserver to display current website, the changes on the posts or templates will cause a reload on the browser
 
 **clean**: removes the content of build folder
 
-**delete** <postname>: deletes the post with given name
+**delete** postname: deletes the post with given name
 
-**deleteall**: removes all the content inside build and posts folder
+**deleteall**: removes all of the content inside build and posts folder
 
 ---
 
-**Current configuration**
+**current configuration**
+
+**base-url**: absolute url of the website (eg. https://mark.github.io/my-website/) 
 
 **port**: port of the webserver
 
 **website-name**: website of the name visible on tabs & website
 
-**template-name**: name of the template folder
+**template-name**: name of the template folder (will be searched inside the templates folder)
 
 **posts-per-page**: how many pages should be shown per page, pagination has to be enabled for this one
 
-**pagination**: true or false
+**pagination**: true or false to enable/disable pagination
 
-**icon-path**: path to the website icon, if it is placed in content/static folder file name would be enough
+**icon-path**: path to the website icon, should be placed inside the content/static folder
 
-extra to add custom content, as example given below
-
-**extra**: 
+**extra**: extra can be used to add a custom content, giving the respective markdown & template file, example below 
 - { $content_path: $template_path, visible-name: $name }
 - { projects.md: "projects.html", visible-name: "projects" }
 

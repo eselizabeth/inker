@@ -6,7 +6,7 @@ use crate::config::{InkerConfig};
 use crate::webserver::{run_server};
 
 
-const CURRENT_COMMANDS: [&'static str; 6] = ["build", "clean", "new", "delete", "deleteall", "livereload"];
+const CURRENT_COMMANDS: [&'static str; 6] = ["server", "publish", "clean", "new", "delete", "deleteall"];
 
 
 pub struct Cli<'a>{
@@ -16,8 +16,9 @@ pub struct Cli<'a>{
 
 impl Cli<'_>{
     pub fn new(args: &[String]) -> Result<Cli, &'static str>{
+        FileHandler::initalize();
         if args.len() < 2 {
-            return Err("not enough arguments");
+            return Err("not enough arguments. please enter one of the following commands: \nserver\npublish\nclean\nnew\ndelete\ndeleteall");
         }
         let command = args[1].clone();
         if command == "new".to_string()
@@ -28,19 +29,30 @@ impl Cli<'_>{
             }
         }
         if !CURRENT_COMMANDS.contains(&command.as_str()){
-            return Err("you have entered an unknown command. current commands are \nbuild\nclean\nnew\ndelete\ndeleteall\nlivereload");
+            return Err("you have entered an unknown command. current commands are \nserver\npublish\nclean\nnew\ndelete\ndeleteall");
         }
         let all_args = args;
         Ok(Cli{command, all_args})
     }
     pub fn handle_input(&self){
-        FileHandler::initalize();
-        if self.command == "build"{
+        if self.command == "server"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
-            let mut generator = Generator::new();
+            let mut generator = Generator::new(false);
             generator.generate();
-            run_server().expect("couldn't start the server");
+            match run_server(){
+                Ok(()) => (),
+                Err(error) => match error.kind() {
+                    ErrorKind::AddrInUse => println!("this port is already in use: {}", InkerConfig::new().port),
+                    _ => println!("{}", error)
+                }            
+            }
         }
+        else if self.command == "publish"{
+            let mut generator = Generator::new(true);
+            generator.generate();
+            println!("successfully generated the content to the publish folder");
+        }
+
         else if self.command == "clean"{
             FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
         }
@@ -68,18 +80,6 @@ impl Cli<'_>{
             else{
                 println!("please enter yes or no");
             }
-        }
-        else if self.command == "livereload"{
-            FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
-            let mut generator = Generator::new();
-            generator.generate();
-            println!("watching for changes..");
-            match run_server(){
-                Ok(()) => (),
-                Err(error) => match error.kind() {
-                    ErrorKind::AddrInUse => println!("this port is already in use: {}", InkerConfig::new().port),
-                    _ => println!("{}", error)
-                }            }
         }
     }
 }

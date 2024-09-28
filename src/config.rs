@@ -6,6 +6,7 @@ use serde::{Serialize, Deserialize};
 
 
 pub struct InkerConfig{
+    pub base_url: String,
     pub port: u16,
     pub website_name: String,
     pub template_name: String,
@@ -17,7 +18,7 @@ pub struct InkerConfig{
     pub headers: Vec<String>,
 }
 
-const DEFAULT_CONFIG: &str = r#"port: 8080
+const DEFAULT_CONFIG: &str = r#"webserver_port: 8080
 website-name: "inker website"
 posts-per-page: "4"
 pagination: "false"
@@ -51,7 +52,11 @@ impl InkerConfig{
         }
         let configs: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let config = &configs[0];
-        let port: u16 = config["port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
+        let mut base_url = config["base-url"].as_str().unwrap_or("/").to_string();
+        if base_url.ends_with("/"){
+            base_url = base_url.strip_suffix("/").unwrap().to_string();
+        }
+        let port: u16 = config["webserver-port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
         let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
         let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
@@ -75,7 +80,14 @@ impl InkerConfig{
                 headers.push(header.as_str().unwrap().to_string());
             }
         }
-        InkerConfig{port, website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
+        InkerConfig{base_url, port, website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
+    }
+    /// changes the base_url to / to disregard original base_url
+    pub fn webserver_usage(&mut self){
+        self.base_url = "".to_string();
+    }
+    pub fn publish_folder() -> &'static str{
+        return "publish";
     }
     pub fn build_folder() -> &'static str{
         return "build";

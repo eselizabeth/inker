@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %} {{website_name}} {% endblock title %}
 {% block head %}
-<link href="/static/bootstrap.min.css" rel="stylesheet">
-<link href="/static/custom.css" rel="stylesheet">
+<link href="{{base_url}}/static/bootstrap.min.css" rel="stylesheet">
+<link href="{{base_url}}/static/custom.css" rel="stylesheet">
 {% endblock head %}
 
 
@@ -20,7 +20,7 @@
             <div class="col-md-6 offset-md-3 mb-5">
                 <div>
                   <h4>
-                    <a href="/posts/{{post.title_slug}}" class="text-light" style="text-decoration: none;">{{post.info.title[0]}}</a>
+                    <a href="{{base_url}}/posts/{{post.title_slug}}" class="text-light" style="text-decoration: none;">{{post.info.title[0]}}</a>
                   </h4>
                   <span class="text-success">{{post.date | date(format="%d %B %Y")}}</span>
                   <br>
@@ -31,7 +31,7 @@
                     {% for tag in post.info.tags %}
                       <span class="badge rounded-pill text-bg-primary">{{tag}}</span>
                     {% endfor %}
-                    <a href="/posts/{{post.title_slug}}" class="text-success" style="text-decoration: none;">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
+                    <a href="{{base_url}}/posts/{{post.title_slug}}" class="text-success" style="text-decoration: none;">read more <i class="fa-solid fa-circle-chevron-right"></i></a>
                   </div>
 
                 </div>
@@ -43,23 +43,23 @@
             <ul class="pagination justify-content-center">
               {% if page_counter != 1 %}
               <li class="page-item">
-                <a class="page-link" href="/page/{{page_counter - 1}}" aria-label="Previous">
+                <a class="page-link" href="{{base_url}}/page/{{page_counter - 1}}" aria-label="Previous">
                   <span aria-hidden="true">&laquo;</span>
                 </a>
               </li>
               {% endif %}
               {% if page_counter > 1 %}
-              <li class="page-item"><a class="page-link" href="/page/{{page_counter - 1}}">{{page_counter - 1}}</a></li>
+              <li class="page-item"><a class="page-link" href="{{base_url}}/page/{{page_counter - 1}}">{{page_counter - 1}}</a></li>
               {% endif %}
               {% if page_counter <= max_page_counter %}
-              <li class="page-item"><a class="page-link" href="/page/{{page_counter}}">{{page_counter}}</a></li>
+              <li class="page-item"><a class="page-link" href="{{base_url}}/page/{{page_counter}}">{{page_counter}}</a></li>
               {% endif %}
               {% if page_counter < max_page_counter %}
-              <li class="page-item"><a class="page-link" href="/page/{{page_counter + 1}}">{{page_counter + 1}}</a></li>
+              <li class="page-item"><a class="page-link" href="{{base_url}}/page/{{page_counter + 1}}">{{page_counter + 1}}</a></li>
               {% endif %}
               {% if page_counter < max_page_counter %}
               <li class="page-item">
-                <a class="page-link" href="/page/{{page_counter + 1}}" aria-label="Next">
+                <a class="page-link" href="{{base_url}}/page/{{page_counter + 1}}" aria-label="Next">
                   <span aria-hidden="true">&raquo;</span>
                 </a>
               </li>
