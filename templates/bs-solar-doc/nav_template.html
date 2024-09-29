@@ -10,7 +10,7 @@
           <div id="collapse{{loop.index}}" class="accordion-collapse collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
                 {% for sub_item in main_item.items %}
-                <a id="/posts/{{sub_item.title_slug}}" href="/posts/{{sub_item.title_slug}}">{{sub_item.order}} - {{sub_item.title}}</a>
+                <a id="/posts/{{sub_item.title_slug}}" href="{{base_url}}/posts/{{sub_item.title_slug}}">{{sub_item.order}} - {{sub_item.title}}</a>
                 <br>
                 {% endfor %}
             </div>
