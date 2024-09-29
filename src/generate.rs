@@ -118,7 +118,7 @@ impl Generator{
     /// Generates post to the $BUILD folder
     pub fn generate(&mut self){
         FileHandler::create_folder(&format!("{}/{}", self.output_folder, "static"));
-        FileHandler::move_content(format!("content/static"), format!("build/static"),"md");
+        FileHandler::move_content(format!("content/static"), format!("{}/static", &self.output_folder),"md");
         let posts_names: Vec<String> = FileHandler::get_posts();
         let mut posts: Vec<Post> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", self.output_folder, InkerConfig::posts_folder()));
@@ -171,7 +171,7 @@ impl Generator{
             context.insert("base_url", &self.config.base_url);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
             let output_path = format!("{}/{}/index.html", &self.output_folder, content_info.title);
-            FileHandler::create_folder(format!("build/{}", content_info.title).as_str());
+            FileHandler::create_folder(format!("{}/{}", &self.output_folder, content_info.title).as_str());
             self.write_to_a_file(&output_path.clone(), output.clone());
         }
     }
