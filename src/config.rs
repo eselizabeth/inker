@@ -4,6 +4,7 @@ use std::{fs};
 use yaml_rust::{Yaml, YamlLoader};
 use serde::{Serialize, Deserialize};
 
+use crate::file_handler::FileHandler;
 
 pub struct InkerConfig{
     pub base_url: String,
@@ -40,7 +41,7 @@ impl ContentInfo{
 }
 
 impl InkerConfig{
-    pub fn new() -> InkerConfig{
+    pub fn new() -> Result<InkerConfig, &'static str>{
         let config_file = fs::read_to_string("config.yaml");
         let config_content: String;
         if config_file.is_ok(){
@@ -59,6 +60,9 @@ impl InkerConfig{
         let port: u16 = config["webserver-port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
         let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
         let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
+        if !FileHandler::folder_existence(&template_name){
+            return Err("the template with given name couldn't be found under templates/ folder: ");
+        }
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
         let pagination: bool = config["pagination"].as_str().unwrap_or("false").to_string().parse().unwrap();
         let generate_nav: bool = config["generate-nav"].as_str().unwrap_or("false").to_string().parse().unwrap();
@@ -80,7 +84,7 @@ impl InkerConfig{
                 headers.push(header.as_str().unwrap().to_string());
             }
         }
-        InkerConfig{base_url, port, website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers}
+        Ok(InkerConfig{base_url, port, website_name, template_name, posts_per_page, generate_nav, pagination, icon_path, extra_contents, headers})
     }
     /// changes the base_url to / to disregard original base_url
     pub fn webserver_usage(&mut self){
@@ -99,12 +103,12 @@ impl InkerConfig{
         return "posts";
     }
     pub fn template_folder() -> std::string::String{
-        let template_name = InkerConfig::new().template_name;
+        let template_name = InkerConfig::new().unwrap().template_name;
         return "templates/".to_string() + &template_name.to_string().clone();
     }
     /// returns the default post template [from template/model.yaml]
     pub fn post_template() -> String{
-        let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().template_name + "/model.yaml").expect("model.yaml is missing!");
+        let mut model = fs::read_to_string("templates/".to_string() + &InkerConfig::new().unwrap().template_name + "/model.yaml").expect("model.yaml is missing!");
         let rest = format!("\ndate: {} # this field is mandatory to have \n---\nenter your content here", InkerConfig::current_time());
         model = "---\n".to_string() + &model + &rest;
         return model;

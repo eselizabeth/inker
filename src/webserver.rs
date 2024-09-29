@@ -40,7 +40,7 @@ async fn send_norefresh() -> HttpResponse {
 
 #[actix_web::main]
 pub async fn run_server() -> std::io::Result<()> {
-    let server_port: u16 = InkerConfig::new().port;
+    let server_port: u16 = InkerConfig::new().unwrap().port;
     use actix_web::{App, HttpServer};
     println!("the web server is started at: http://0.0.0.0:{}", server_port);
     HttpServer::new(|| App::new()

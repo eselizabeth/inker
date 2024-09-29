@@ -15,7 +15,6 @@ impl FileHandler{
         let _ = FileHandler::create_folder(InkerConfig::posts_folder());
         let _ = FileHandler::create_folder(InkerConfig::publish_folder());
         let _ = FileHandler::create_folder(InkerConfig::build_folder());
-        let _ = FileHandler::create_folder(InkerConfig::template_folder().as_str());
         let _ = FileHandler::create_folder(InkerConfig::content_folder());
         let _ = FileHandler::create_folder(&(InkerConfig::content_folder().to_owned() + &"/static".to_string()));
     }
@@ -91,14 +90,17 @@ impl FileHandler{
 
     /// Creates a folder: returns false if the folder doesn't exists
     pub fn delete_folder(folder_name: &str) -> bool{
-        let folder_exists: bool = Path::new(folder_name).is_dir();
-    if folder_exists{
+        if Self::folder_existence(folder_name){
             fs::remove_dir_all(folder_name).expect("Couldn't delete the file");
             return true;
         }
         else{
             return false;
         }
+    }
+    // Returns true if the folder with given path exists, otherwise will return false
+    pub fn folder_existence(folder_name: &str) -> bool{
+        return Path::new(folder_name).is_dir();
     }
 
     /// Iterates over the from_folder folder ands moves each file that doesn't fit to the filter to to_folder folder

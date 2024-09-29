@@ -54,3 +54,4 @@ TODO:
 - [x] Documentation theme
 - [x] Live reload
 - [x] Custom model data
+- [ ] Better error handling

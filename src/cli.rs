@@ -42,7 +42,7 @@ impl Cli<'_>{
             match run_server(){
                 Ok(()) => (),
                 Err(error) => match error.kind() {
-                    ErrorKind::AddrInUse => println!("this port is already in use: {}", InkerConfig::new().port),
+                    ErrorKind::AddrInUse => println!("this port is already in use: {}", InkerConfig::new().unwrap().port),
                     _ => println!("{}", error)
                 }            
             }
@@ -71,6 +71,7 @@ impl Cli<'_>{
             user_input.pop().unwrap(); // to remove the \n
             if user_input == "y" || user_input == "yes"{
                 FileHandler::remove_folder_content(InkerConfig::build_folder().to_string());
+                FileHandler::remove_folder_content(InkerConfig::publish_folder().to_string());
                 FileHandler::remove_folder_content("posts".to_string());
                 println!("all content has been deleted");
             }

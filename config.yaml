@@ -4,10 +4,11 @@ website-name: "inker website"
 posts-per-page: "4"
 pagination: "false"
 icon-path: "favicon.png"
-template-name: "bs-darkly"
+template-name: "navy"
 generate-nav: "false"
 extra:
   - { projects.md: "projects.html", visible-name: "projects" }
+  - { about.md: "about.html", visible-name: "about" }
 headers:
 - "1. Introduction"
 - "2. Configuration"

@@ -105,7 +105,7 @@ impl Generator{
             Err(error) => panic!("Problem with glob: {:?}", error),
         };
         tera.autoescape_on(vec![]);
-        let mut config = InkerConfig::new();
+        let mut config = InkerConfig::new().unwrap();
         let mut output_folder = InkerConfig::publish_folder().to_string();
         if !for_publish{
             let _ = &config.webserver_usage();
