@@ -1,0 +1,5 @@
+title: "post title"
+summary: "post summary"
+author: "author"
+draft: "false" # if it's set to true, the post will not be generated
+tags: [tag1, tag2] # only mandatory fields are title, author, date

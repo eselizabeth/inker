@@ -1,11 +1,11 @@
 base-url: "https://eselizabeth.github.io/inker-example"
 webserver-port: "5005"
-website-name: "inker website"
+website-name: "inker"
 posts-per-page: "4"
 pagination: "false"
-icon-path: "favicon.png"
+icon-path: "inker.png"
 template-name: "navy"
-generate-nav: "false"
+generate-nav: "true"
 extra:
   - { projects.md: "projects.html", visible-name: "projects" }
   - { about.md: "about.html", visible-name: "about" }

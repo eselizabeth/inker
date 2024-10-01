@@ -60,7 +60,7 @@ impl InkerConfig{
         let port: u16 = config["webserver-port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
         let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
         let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
-        if !FileHandler::folder_existence(&template_name){
+        if !FileHandler::folder_existence(&("templates/".to_owned() + &template_name)){
             return Err("the template with given name couldn't be found under templates/ folder: ");
         }
         let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();

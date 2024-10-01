@@ -143,6 +143,8 @@ impl Generator{
             context.insert("post", &new_post);
             context.insert("icon_path", &self.config.icon_path);
             context.insert("base_url", &self.config.base_url);
+            context.insert("website_name", &self.config.website_name);
+
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             self.write_to_a_file(&output_path, output);
             posts.push(new_post);
@@ -169,6 +171,7 @@ impl Generator{
             context.insert("title", &content_info.title);
             context.insert("icon_path", &self.config.icon_path);
             context.insert("base_url", &self.config.base_url);
+            context.insert("website_name", &self.config.website_name);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
             let output_path = format!("{}/{}/index.html", &self.output_folder, content_info.title);
             FileHandler::create_folder(format!("{}/{}", &self.output_folder, content_info.title).as_str());
@@ -234,6 +237,8 @@ impl Generator{
         context.insert("navigator", &navigator.clone());
         context.insert("icon_path", &self.config.icon_path);
         context.insert("base_url", &self.config.base_url);
+        context.insert("website_name", &self.config.website_name);
+
         let output = self.tera.render("nav_template.html", &context).expect("Couldn't render context to template");
         self.write_to_a_file(format!("{}/nav.html", &self.output_folder).as_str(), output);
         }
