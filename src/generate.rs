@@ -94,7 +94,8 @@ pub struct Generator{
     tera: tera::Tera,
     config: InkerConfig,
     for_publish: bool,
-    output_folder: String
+    output_folder: String,
+    navigation_html: String,
 }
 
 impl Generator{
@@ -111,19 +112,27 @@ impl Generator{
             let _ = &config.webserver_usage();
             output_folder = InkerConfig::build_folder().to_string();
         }
-
-        Generator{tera, config, for_publish, output_folder}
+        let navigation_html = String::from("");
+        Generator{tera, config, for_publish, output_folder, navigation_html}
     }
 
     /// Generates post to the $BUILD folder
     pub fn generate(&mut self){
         FileHandler::create_folder(&format!("{}/{}", self.output_folder, "static"));
         FileHandler::move_content(format!("content/static"), format!("{}/static", &self.output_folder),"md");
-        let posts_names: Vec<String> = FileHandler::get_posts();
-        let mut posts: Vec<Post> = Vec::new();
         FileHandler::create_folder(&format!("{}/{}", self.output_folder, InkerConfig::posts_folder()));
+        let mut posts: Vec<Post> = self.generate_posts(); 
+        self.get_index(&mut posts);
+        self.generate_extra();
+    }
+
+    /// generates the posts
+    pub fn generate_posts(&mut self) -> Vec<Post>{
+        let mut posts: Vec<Post> = Vec::new();
+        let posts_names: Vec<String> = FileHandler::get_posts();
         let mut generated_posts: i32 = 0;
         let mut navigation: Vec<(String, String, String)> = Vec::new();
+        // this iteration the navigation first
         for post in &posts_names{
             let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
                 println!("inker failed: {err}");
@@ -133,6 +142,19 @@ impl Generator{
                 continue;
             }
             navigation.push((new_post.order.clone(), new_post.info["title"][0].clone(), new_post.title_slug.clone()));
+        }
+        if self.config.generate_nav {
+            self.navigation_html = self.generate_navigation(&mut navigation);
+        }
+        // this part generates the psots
+        for post in &posts_names{
+            let new_post = Post::new(post.as_str()).unwrap_or_else(|err| {
+                println!("inker failed: {err}");
+                process::exit(1);
+            });
+            if new_post.info["draft"][0] == "true".to_string(){
+                continue;
+            }            
             generated_posts += 1;
             FileHandler::create_folder(&format!("{}/{}/{}/", self.output_folder, InkerConfig::posts_folder(), post));
             let output_path = format!("{}/{}/{}/index.html", self.output_folder, InkerConfig::posts_folder(), post);
@@ -144,6 +166,7 @@ impl Generator{
             context.insert("icon_path", &self.config.icon_path);
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
+            context.insert("navigation", &self.navigation_html);
 
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             self.write_to_a_file(&output_path, output);
@@ -153,13 +176,10 @@ impl Generator{
             println!("there isn't any post to generate");
             process::exit(0);
         }
-        self.generate_extra();
-        self.get_index(&mut posts);
-        if self.config.generate_nav {
-            self.generate_navigation(&mut navigation);
-        }
+        return posts;
     }
 
+    /// renders the custom pages given in config.yaml file
     pub fn generate_extra(&mut self){
         for content_info in &self.config.extra_contents{
             let src_path = format!("{}/{}", InkerConfig::content_folder(), content_info.content_src);
@@ -172,6 +192,7 @@ impl Generator{
             context.insert("icon_path", &self.config.icon_path);
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
+            context.insert("navigation", &self.navigation_html);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
             let output_path = format!("{}/{}/index.html", &self.output_folder, content_info.title);
             FileHandler::create_folder(format!("{}/{}", &self.output_folder, content_info.title).as_str());
@@ -209,8 +230,8 @@ impl Generator{
         return html_output;
     }
     
-
-    fn generate_navigation(&mut self, posts: &mut Vec<(String, String, String)>){
+    /// generates the navigation using nav_template.html
+    fn generate_navigation(&mut self, posts: &mut Vec<(String, String, String)>) -> String{
         posts.sort_by_key(|p| p.0.clone());
         let mut navigator: Vec<MainItem> = Vec::new();
         let mut main_headers = self.config.headers.clone();
@@ -238,13 +259,15 @@ impl Generator{
         context.insert("icon_path", &self.config.icon_path);
         context.insert("base_url", &self.config.base_url);
         context.insert("website_name", &self.config.website_name);
+        context.insert("navigation", &self.navigation_html);
 
         let output = self.tera.render("nav_template.html", &context).expect("Couldn't render context to template");
-        self.write_to_a_file(format!("{}/nav.html", &self.output_folder).as_str(), output);
+        return output
+        //self.write_to_a_file(format!("{}/nav.html", &self.output_folder).as_str(), output);
         }
     
 
-    // gets the post names and generates main page for them
+    /// generates the main page using index.html
     fn get_index(&mut self, posts: &mut Vec<Post>){
         posts.sort_by_key(|item| (item.order.clone(), Reverse(item.date.clone())));
         if self.config.pagination == false{
@@ -256,6 +279,8 @@ impl Generator{
             context.insert("icon_path", &self.config.icon_path);
             context.insert("contents", &self.config.extra_contents);
             context.insert("base_url", &self.config.base_url);
+            context.insert("navigation", &self.navigation_html);
+
             let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
             let output_path = format!("{}/index.html", &self.output_folder); 
             self.write_to_a_file(&output_path, output);
@@ -275,6 +300,7 @@ impl Generator{
                 context.insert("icon_path", &self.config.icon_path);
                 context.insert("contents", &self.config.extra_contents);
                 context.insert("base_url", &self.config.base_url);
+                context.insert("navigation", &self.navigation_html);
                 if posts.len() >= self.config.posts_per_page as usize{
                     let page_posts: Vec<Post> = get_first_n_elements(posts, self.config.posts_per_page);
                     context.insert("posts", &page_posts);

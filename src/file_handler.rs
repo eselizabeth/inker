@@ -50,7 +50,7 @@ impl FileHandler{
         }
     }
 
-    /// Iterates over the folder and deletes the content
+    /// Iterates over the given folder and deletes the content inside without deleting the folder
     pub fn remove_folder_content(path: String){
         for entry in fs::read_dir(path).unwrap() {
             //println!("{:?}", entry.unwrap().path());
@@ -63,7 +63,7 @@ impl FileHandler{
         }
     }
 
-    /// Iterates over the folder and deletes the content
+    /// Iterates over the posts folder and returns a vector containing post names
     pub fn get_posts() -> Vec<String>{
         let mut posts: Vec<String> = Vec::new();
         for folder in fs::read_dir(InkerConfig::posts_folder()).unwrap() {
