@@ -7,14 +7,14 @@ use crate::generate::{Generator};
 use std::path::Path;
 use actix_web::rt::time::sleep;
 
-const CHANGE_DURATION: u64 = 5;
+const CHANGE_DURATION: u64 = 1; // the time duration in seconds, which is used by the check_changes function
 
 #[get("/change")]
 async fn change() -> HttpResponse {
     sleep(Duration::from_secs(CHANGE_DURATION)).await;
     let any_change: bool = check_changes().await;
     if any_change {
-        println!("changes has been found, reloading");
+        // println!("changes has been found, reloading");
         send_refresh().await
     }
     else{
@@ -92,13 +92,15 @@ async fn get_extra(path: web::Path<String>) -> fs::NamedFile {
 /// Checkes input files for changes
 /// InkerConfig::template_folder()
 /// InkerConfig::posts_folder()
+/// /// InkerConfig::content_folder()
 /// "config.yaml"
 async fn check_changes() -> bool{
     let current_time = SystemTime::now();
-    let posts_folder_changed = folder_changed(InkerConfig::posts_folder().to_string(), current_time);
-    let template_folder_changed = folder_changed(InkerConfig::template_folder().to_string(), current_time);
-    let config_changed = file_changed("config.yaml".to_string(), current_time);
-    if posts_folder_changed || template_folder_changed || config_changed{
+    let changed_template = folder_changed(InkerConfig::template_folder().to_string(), current_time);
+    let changed_post = folder_changed(InkerConfig::posts_folder().to_string(), current_time);
+    let changed_content = folder_changed(InkerConfig::content_folder().to_string(), current_time);
+    let changed_config = file_changed("config.yaml".to_string(), current_time);
+    if changed_post || changed_template || changed_content || changed_config{
         let mut generator = Generator::new(false);
         generator.generate();
         return true;

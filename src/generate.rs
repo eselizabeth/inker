@@ -13,6 +13,26 @@ use std::cmp::Reverse;
 
 extern crate tera;
 
+const LIVE_RELOAD_SCRIPT: &str = r#"
+<script>
+async function updateMessage() {
+    try {
+      const response = await fetch('/change');
+      const message = await response.text();
+      console.log(message);
+    
+      if (message === "refresh") {
+        location.reload();
+      }
+    } catch (e) {
+      // do nothing
+    }
+      
+  }
+  setInterval(updateMessage, 1000);
+</script>
+"#;
+
 #[derive(Serialize, Clone, Debug)]
 pub struct Post{
     title_slug: String,
@@ -167,6 +187,7 @@ impl Generator{
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
             context.insert("navigation", &self.navigation_html);
+            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
 
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             self.write_to_a_file(&output_path, output);
@@ -193,6 +214,7 @@ impl Generator{
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
             context.insert("navigation", &self.navigation_html);
+            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
             let output_path = format!("{}/{}/index.html", &self.output_folder, content_info.title);
             FileHandler::create_folder(format!("{}/{}", &self.output_folder, content_info.title).as_str());
@@ -260,6 +282,7 @@ impl Generator{
         context.insert("base_url", &self.config.base_url);
         context.insert("website_name", &self.config.website_name);
         context.insert("navigation", &self.navigation_html);
+        context.insert("live_reload", LIVE_RELOAD_SCRIPT);
 
         let output = self.tera.render("nav_template.html", &context).expect("Couldn't render context to template");
         return output
@@ -280,6 +303,7 @@ impl Generator{
             context.insert("contents", &self.config.extra_contents);
             context.insert("base_url", &self.config.base_url);
             context.insert("navigation", &self.navigation_html);
+            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
 
             let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
             let output_path = format!("{}/index.html", &self.output_folder); 
@@ -301,6 +325,7 @@ impl Generator{
                 context.insert("contents", &self.config.extra_contents);
                 context.insert("base_url", &self.config.base_url);
                 context.insert("navigation", &self.navigation_html);
+                context.insert("live_reload", LIVE_RELOAD_SCRIPT);
                 if posts.len() >= self.config.posts_per_page as usize{
                     let page_posts: Vec<Post> = get_first_n_elements(posts, self.config.posts_per_page);
                     context.insert("posts", &page_posts);

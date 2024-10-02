@@ -50,22 +50,5 @@
 
 
 
-
-async function updateMessage() {
-  try {
-    const response = await fetch('/change');
-    const message = await response.text();
-    console.log(message);
-  
-    if (message === "refresh") {
-      location.reload();
-    }
-  } catch (e) {
-    // do nothing
-  }
-    
-}
-setInterval(updateMessage, 3000);
-
 </script>
 {% endblock custom_script %}
