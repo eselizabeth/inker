@@ -116,6 +116,7 @@ pub struct Generator{
     for_publish: bool,
     output_folder: String,
     navigation_html: String,
+    live_reload_script: String,
 }
 
 impl Generator{
@@ -133,7 +134,11 @@ impl Generator{
             output_folder = InkerConfig::build_folder().to_string();
         }
         let navigation_html = String::from("");
-        Generator{tera, config, for_publish, output_folder, navigation_html}
+        let mut live_reload_script = LIVE_RELOAD_SCRIPT.to_string();
+        if for_publish{
+            live_reload_script = "".to_string();
+        }
+        Generator{tera, config, for_publish, output_folder, navigation_html, live_reload_script}
     }
 
     /// Generates post to the $BUILD folder
@@ -187,7 +192,7 @@ impl Generator{
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
             context.insert("navigation", &self.navigation_html);
-            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
+            context.insert("live_reload", &self.live_reload_script);
 
             let output = self.tera.render("post.html", &context).expect("Couldn't render context to template");
             self.write_to_a_file(&output_path, output);
@@ -214,7 +219,7 @@ impl Generator{
             context.insert("base_url", &self.config.base_url);
             context.insert("website_name", &self.config.website_name);
             context.insert("navigation", &self.navigation_html);
-            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
+            context.insert("live_reload", &self.live_reload_script);
             let output = self.tera.render(content_info.template_src.as_str(), &context).expect("Couldn't render context to template");
             let output_path = format!("{}/{}/index.html", &self.output_folder, content_info.title);
             FileHandler::create_folder(format!("{}/{}", &self.output_folder, content_info.title).as_str());
@@ -282,7 +287,7 @@ impl Generator{
         context.insert("base_url", &self.config.base_url);
         context.insert("website_name", &self.config.website_name);
         context.insert("navigation", &self.navigation_html);
-        context.insert("live_reload", LIVE_RELOAD_SCRIPT);
+        context.insert("live_reload", &self.live_reload_script);
 
         let output = self.tera.render("nav_template.html", &context).expect("Couldn't render context to template");
         return output
@@ -303,7 +308,7 @@ impl Generator{
             context.insert("contents", &self.config.extra_contents);
             context.insert("base_url", &self.config.base_url);
             context.insert("navigation", &self.navigation_html);
-            context.insert("live_reload", LIVE_RELOAD_SCRIPT);
+            context.insert("live_reload", &self.live_reload_script);
 
             let output = self.tera.render("index.html", &context).expect("Couldn't render context to template");
             let output_path = format!("{}/index.html", &self.output_folder); 
@@ -325,7 +330,7 @@ impl Generator{
                 context.insert("contents", &self.config.extra_contents);
                 context.insert("base_url", &self.config.base_url);
                 context.insert("navigation", &self.navigation_html);
-                context.insert("live_reload", LIVE_RELOAD_SCRIPT);
+                context.insert("live_reload", &self.live_reload_script);
                 if posts.len() >= self.config.posts_per_page as usize{
                     let page_posts: Vec<Post> = get_first_n_elements(posts, self.config.posts_per_page);
                     context.insert("posts", &page_posts);
