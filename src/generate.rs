@@ -263,19 +263,23 @@ impl Generator{
         let mut navigator: Vec<MainItem> = Vec::new();
         let mut main_headers = self.config.headers.clone();
         let mut current_header = MainItem::new(main_headers.remove(0));
+        let mut current_header_index = 1;
         for post in posts{
-            if post.0.chars().nth(0) == current_header.order.chars().nth(0){
+            let full_order_of_post = post.0.chars().nth(0).unwrap();
+            if full_order_of_post == char::from_digit(current_header_index, 10).unwrap(){
                 // do nothing
             }
+
             else{
                 navigator.push(current_header);
                 if main_headers.len() > 0{
                     current_header = MainItem::new(main_headers.remove(0));
+                    current_header_index += 1;
                 }
                 else{
                     current_header =  MainItem::new("none".to_string());
                 }
-                }
+            }
             let sub_item = SubItem::new(post.1.clone(), post.2.clone(), post.0.clone());
             current_header.items.push(sub_item.clone());
         }
