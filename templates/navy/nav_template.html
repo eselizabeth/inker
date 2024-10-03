@@ -6,7 +6,7 @@
               <a href="">{{main_item.title}}</a>
               {% for sub_item in main_item.items %}
               <ul>
-                  <li><a href="{{base_url}}/posts/{{sub_item.title_slug}}">{{sub_item.order}} - {{sub_item.title}}</a></li>
+                  <li><a href="{{base_url}}/posts/{{sub_item.title_slug}}">{{sub_item.title}}</a></li>
               </ul>
               {% endfor %}
           </li>

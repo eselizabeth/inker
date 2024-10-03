@@ -20,10 +20,10 @@ pub struct InkerConfig{
 }
 
 const DEFAULT_CONFIG: &str = r#"webserver_port: 8080
-website-name: "inker website"
-posts-per-page: "4"
+website_name: "inker website"
+posts_per_page: "4"
 pagination: "false"
-icon-path: "none"
+icon_path: "none"
 generate_nav: "false"
 "#;
 
@@ -53,20 +53,20 @@ impl InkerConfig{
         }
         let configs: Vec<Yaml> = YamlLoader::load_from_str(&config_content).unwrap();
         let config = &configs[0];
-        let mut base_url = config["base-url"].as_str().unwrap_or("/").to_string();
+        let mut base_url = config["base_url"].as_str().unwrap_or("/").to_string();
         if base_url.ends_with("/"){
             base_url = base_url.strip_suffix("/").unwrap().to_string();
         }
-        let port: u16 = config["webserver-port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
-        let website_name = config["website-name"].as_str().unwrap_or("inker website").to_string();
-        let template_name: String = config["template-name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
+        let port: u16 = config["webserver_port"].as_str().unwrap_or("8080").to_string().parse().unwrap();
+        let website_name = config["website_name"].as_str().unwrap_or("inker website").to_string();
+        let template_name: String = config["template_name"].as_str().unwrap_or("bs-darkly").to_string().parse().unwrap();
         if !FileHandler::folder_existence(&("templates/".to_owned() + &template_name)){
             return Err("the template with given name couldn't be found under templates/ folder: ");
         }
-        let posts_per_page: i32 = config["posts-per-page"].as_str().unwrap_or("4").to_string().parse().unwrap();
+        let posts_per_page: i32 = config["posts_per_page"].as_str().unwrap_or("4").to_string().parse().unwrap();
         let pagination: bool = config["pagination"].as_str().unwrap_or("false").to_string().parse().unwrap();
-        let generate_nav: bool = config["generate-nav"].as_str().unwrap_or("false").to_string().parse().unwrap();
-        let icon_path: String = config["icon-path"].as_str().unwrap_or("none").to_string().parse().unwrap();
+        let generate_nav: bool = config["generate_nav"].as_str().unwrap_or("false").to_string().parse().unwrap();
+        let icon_path: String = config["icon_path"].as_str().unwrap_or("none").to_string().parse().unwrap();
         let extra =  &config["extra"];
         let mut extra_contents: Vec<ContentInfo> = Vec::new();
         if !extra.is_badvalue(){

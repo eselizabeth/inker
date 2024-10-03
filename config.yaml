@@ -1,16 +1,16 @@
-base-url: "https://eselizabeth.github.io/inker-example"
-webserver-port: "5005"
-website-name: "inker"
-posts-per-page: "4"
+base_url: "https://eselizabeth.github.io/inker-example"
+webserver_port: "5005"
+website_name: "inker"
+posts_per_page: "4"
 pagination: "false"
-icon-path: "inker.png"
-template-name: "navy"
-generate-nav: "true"
+icon_path: "inker.png"
+template_name: "navy"
+generate_nav: "true"
 extra:
   - { projects.md: "projects.html", visible-name: "projects" }
   - { about.md: "about.html", visible-name: "about" }
 headers:
-- "1. Introduction"
-- "2. Configuration"
-- "3. Templates and Extra content"
-- "4. Deployment"
+- "Getting started"
+- "Configuration"
+- "Features"
+- "Deployment"
